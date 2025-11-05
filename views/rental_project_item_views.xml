@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Project Item List View (standalone) -->
+    <record id="view_rental_project_item_list" model="ir.ui.view">
+        <field name="name">rental.project.item.list</field>
+        <field name="model">rental.project.item</field>
+        <field name="arch" type="xml">
+            <list string="Project Items">
+                <field name="project_id"/>
+                <field name="equipment_id"/>
+                <field name="equipment_code"/>
+                <field name="quantity"/>
+                <field name="assigned_serial_count" 
+                       invisible="not equipment_has_serials"/>
+                <field name="serial_numbers_text" 
+                       invisible="not equipment_has_serials"/>
+                <field name="unit_price" widget="monetary"/>
+                <field name="subtotal" widget="monetary" sum="Total"/>
+                <field name="equipment_has_serials" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Project Item Form View (standalone) -->
+    <record id="view_rental_project_item_form" model="ir.ui.view">
+        <field name="name">rental.project.item.form</field>
+        <field name="model">rental.project.item</field>
+        <field name="arch" type="xml">
+            <form string="Project Item">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="project_id" readonly="1"/>
+                            <field name="equipment_id" 
+                                   options="{'no_create': True}"
+                                   readonly="project_state != 'draft'"/>
+                            <field name="equipment_code" readonly="1"/>
+                            <field name="equipment_has_serials" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="quantity" readonly="project_state != 'draft'"/>
+                            <field name="unit_price" widget="monetary"/>
+                            <field name="subtotal" widget="monetary"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Assigned Serials" 
+                              name="serials" 
+                              invisible="not equipment_has_serials">
+                            <field name="assigned_serial_ids" readonly="1">
+                                <list>
+                                    <field name="serial_number"/>
+                                    <field name="status" widget="badge"
+                                           decoration-success="status == 'available'"
+                                           decoration-info="status == 'reserved'"
+                                           decoration-warning="status in ['rented', 'returned']"
+                                           decoration-danger="status in ['damaged', 'repairing']"/>
+                                    <field name="programming_config"/>
+                                </list>
+                            </field>
+                            <group>
+                                <field name="assigned_serial_count" readonly="1"/>
+                            </group>
+                        </page>
+                        
+                        <page string="Photos" name="photos">
+                            <field name="image_ids" widget="many2many_binary"/>
+                        </page>
+                        
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Additional notes for this item..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Project Item Search View -->
+    <record id="view_rental_project_item_search" model="ir.ui.view">
+        <field name="name">rental.project.item.search</field>
+        <field name="model">rental.project.item</field>
+        <field name="arch" type="xml">
+            <search string="Search Project Items">
+                <field name="project_id" string="Project"/>
+                <field name="equipment_id" string="Equipment"/>
+                
+                <filter string="With Serials" name="with_serials" 
+                        domain="[('equipment_has_serials', '=', True)]"/>
+                <filter string="Without Serials" name="without_serials" 
+                        domain="[('equipment_has_serials', '=', False)]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Project" name="group_project" 
+                            context="{'group_by': 'project_id'}"/>
+                    <filter string="Equipment" name="group_equipment" 
+                            context="{'group_by': 'equipment_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Project Item Action (rarely used standalone, mostly embedded in project form) -->
+    <record id="action_rental_project_item" model="ir.actions.act_window">
+        <field name="name">Project Items</field>
+        <field name="res_model">rental.project.item</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    
+    <!-- Project Item Status List View -->
+    <record id="view_rental_project_item_status_list" model="ir.ui.view">
+        <field name="name">rental.project.item.status.list</field>
+        <field name="model">rental.project.item.status</field>
+        <field name="arch" type="xml">
+            <list string="Item Status History" create="0" delete="0">
+                <field name="create_date" string="Date"/>
+                <field name="project_name"/>
+                <field name="equipment_name"/>
+                <field name="serial_number"/>
+                <field name="quantity"/>
+                <field name="status" widget="badge"
+                       decoration-info="status == 'reserved'"
+                       decoration-warning="status == 'rented'"
+                       decoration-success="status in ['returned', 'repaired']"
+                       decoration-danger="status in ['damaged', 'disposed']"/>
+                <field name="user_id"/>
+                <field name="notes"/>
+                <field name="damage_description" optional="hide"/>
+                <field name="damage_severity" optional="hide"/>
+                <field name="repair_cost_estimate" widget="monetary" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Project Item Status Form View -->
+    <record id="view_rental_project_item_status_form" model="ir.ui.view">
+        <field name="name">rental.project.item.status.form</field>
+        <field name="model">rental.project.item.status</field>
+        <field name="arch" type="xml">
+            <form string="Status Entry" create="0" delete="0">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="create_date" readonly="1"/>
+                            <field name="project_id" readonly="1"/>
+                            <field name="equipment_id" readonly="1"/>
+                            <field name="serial_id" readonly="1"/>
+                            <field name="quantity" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="status" readonly="1"/>
+                            <field name="user_id" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Damage Information" 
+                           invisible="status not in ['damaged', 'repairing']">
+                        <field name="damage_description" readonly="1"/>
+                        <field name="damage_severity" readonly="1"/>
+                        <field name="repair_cost_estimate" widget="monetary" readonly="1"/>
+                    </group>
+                    
+                    <group string="Notes">
+                        <field name="notes" readonly="1" nolabel="1"/>
+                    </group>
+                    
+                    <group string="Photos" invisible="not photo_ids">
+                        <field name="photo_ids" widget="many2many_binary" readonly="1" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Project Item Status Search View -->
+    <record id="view_rental_project_item_status_search" model="ir.ui.view">
+        <field name="name">rental.project.item.status.search</field>
+        <field name="model">rental.project.item.status</field>
+        <field name="arch" type="xml">
+            <search string="Search Status History">
+                <field name="project_id" string="Project"/>
+                <field name="equipment_id" string="Equipment"/>
+                <field name="serial_id" string="Serial"/>
+                <field name="user_id" string="User"/>
+                
+                <filter string="Reserved" name="reserved" 
+                        domain="[('status', '=', 'reserved')]"/>
+                <filter string="Rented" name="rented" 
+                        domain="[('status', '=', 'rented')]"/>
+                <filter string="Returned" name="returned" 
+                        domain="[('status', '=', 'returned')]"/>
+                <filter string="Damaged" name="damaged" 
+                        domain="[('status', '=', 'damaged')]"/>
+                <filter string="Under Repair" name="repairing" 
+                        domain="[('status', '=', 'repairing')]"/>
+                
+                <separator/>
+                <filter string="Today" name="today" 
+                        domain="[('create_date', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00')),
+                                 ('create_date', '&lt;=', context_today().strftime('%Y-%m-%d 23:59:59'))]"/>
+                <filter string="This Week" name="this_week" 
+                        domain="[('create_date', '&gt;=', (context_today() - relativedelta(weeks=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="This Month" name="this_month" 
+                        domain="[('create_date', '&gt;=', (context_today() - relativedelta(day=1)).strftime('%Y-%m-%d'))]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Project" name="group_project" 
+                            context="{'group_by': 'project_id'}"/>
+                    <filter string="Equipment" name="group_equipment" 
+                            context="{'group_by': 'equipment_id'}"/>
+                    <filter string="Status" name="group_status" 
+                            context="{'group_by': 'status'}"/>
+                    <filter string="User" name="group_user" 
+                            context="{'group_by': 'user_id'}"/>
+                    <filter string="Date" name="group_date" 
+                            context="{'group_by': 'create_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Project Item Status Action -->
+    <record id="action_rental_project_item_status" model="ir.actions.act_window">
+        <field name="name">Status History</field>
+        <field name="res_model">rental.project.item.status</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_this_month': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                No status history found
+            </p>
+            <p>
+                Status history automatically tracks all equipment state changes
+                during rentals. This includes reservations, pickups, returns,
+                damages, and repairs.
+            </p>
+        </field>
+    </record>
+    
+</odoo>
+
+<!-- 
+**Key Features:**
+
+1. ✅ **Uses `<list>` not `<tree>`** - Odoo 18 compliant
+2. **Standalone views** - Can view project items independently
+3. **Serial display** - Shows assigned serial numbers inline
+4. **Status history** - Complete audit trail with read-only views
+5. **Damage tracking** - Severity, description, cost estimate
+6. **Photo support** - Attach photos to items and status entries
+7. **User tracking** - Who made each status change
+8. **Time filters** - Today, This Week, This Month
+9. **Color-coded statuses** - Visual status indicators
+10. **Read-only history** - Prevent editing historical records (create="0", delete="0")
+-->

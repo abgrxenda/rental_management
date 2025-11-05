@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Rental Settings Form View -->
+    <record id="res_config_settings_view_form_rental" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.rental</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="Rental Management" name="rental_management">
+                    
+                    <!-- Late Fee Settings -->
+                    <block title="Late Fee Settings" name="late_fee_settings">
+                        <setting>
+                            <field name="rental_default_late_fee_enabled"/>
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <span>Enable late fees by default for new rental projects</span>
+                                </div>
+                            </div>
+                        </setting>
+                        
+                        <setting string="Late Fee Calculation">
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="rental_late_fee_daily_rate" class="col-lg-4 o_light_label"/>
+                                    <field name="rental_late_fee_daily_rate" class="oe_inline"/>
+                                    <span class="ms-2">per day overdue</span>
+                                </div>
+                                <div class="row mt8">
+                                    <label for="rental_late_fee_percentage" class="col-lg-4 o_light_label"/>
+                                    <field name="rental_late_fee_percentage" class="oe_inline"/>
+                                    <span class="ms-2">% of rental amount per day</span>
+                                </div>
+                                <div class="row mt8">
+                                    <label for="rental_late_fee_calculation_method" class="col-lg-4 o_light_label"/>
+                                    <field name="rental_late_fee_calculation_method" class="oe_inline"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Serial Number Settings -->
+                    <block title="Serial Number Settings" name="serial_settings">
+                        <setting>
+                            <field name="rental_auto_generate_serials"/>
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <span>Automatically generate serial numbers for equipment without serials</span>
+                                </div>
+                            </div>
+                        </setting>
+                        
+                        <setting string="Serial Number Format" 
+                                 invisible="not rental_auto_generate_serials">
+                            <label for="rental_serial_prefix"/>
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="rental_serial_prefix" class="col-lg-3 o_light_label"/>
+                                    <field name="rental_serial_prefix" class="oe_inline" placeholder="SN"/>
+                                    <span class="ms-2">- EQUIP - 000001</span>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Project Settings -->
+                    <block title="Project Settings" name="project_settings">
+                        <setting string="Default Rental Duration">
+                            <label for="rental_default_rental_duration"/>
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="rental_default_rental_duration" class="col-lg-3 o_light_label"/>
+                                    <field name="rental_default_rental_duration" class="oe_inline"/>
+                                    <span class="ms-2">days</span>
+                                </div>
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <field name="rental_require_signature"/>
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <span>Require digital signature for pickup and return</span>
+                                </div>
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <field name="rental_require_photos"/>
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <span>Require photos during pickup and return</span>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Notification Settings -->
+                    <block title="Notifications" name="notification_settings">
+                        <setting>
+                            <field name="rental_send_reminder_email"/>
+                            <div class="content-group" invisible="not rental_send_reminder_email">
+                                <div class="row mt16">
+                                    <label for="rental_reminder_days_before" class="col-lg-5 o_light_label" string="Send reminder"/>
+                                    <field name="rental_reminder_days_before" class="oe_inline"/>
+                                    <span class="ms-2">days before rental end date</span>
+                                </div>
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <field name="rental_send_overdue_email"/>
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <span>Send email notifications for overdue rentals</span>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Invoice Settings -->
+                    <block title="Invoice Settings" name="invoice_settings">
+                        <setting>
+                            <field name="rental_auto_create_invoice"/>
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <span>Automatically create invoice when equipment is returned</span>
+                                </div>
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <field name="rental_invoice_include_late_fees"/>
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <span>Automatically add late fees to invoice</span>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Stock Settings -->
+                    <block title="Stock &amp; Availability" name="stock_settings">
+                        <setting>
+                            <field name="rental_warn_low_stock"/>
+                            <div class="content-group" invisible="not rental_warn_low_stock">
+                                <div class="row mt16">
+                                    <label for="rental_low_stock_threshold" class="col-lg-5 o_light_label" string="Low stock threshold"/>
+                                    <field name="rental_low_stock_threshold" class="oe_inline"/>
+                                    <span class="ms-2">units</span>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Damage Assessment Settings -->
+                    <block title="Damage Assessment" name="damage_settings">
+                        <setting string="Damage Classification">
+                            <div class="content-group">
+                                <div class="text-muted mb-3">
+                                    Define cost thresholds for automatic damage severity classification
+                                </div>
+                                <div class="row mt8">
+                                    <label for="rental_damage_minor_threshold" class="col-lg-4 o_light_label" string="Minor damage (up to)"/>
+                                    <field name="rental_damage_minor_threshold" class="oe_inline" widget="monetary"/>
+                                </div>
+                                <div class="row mt8">
+                                    <label for="rental_damage_moderate_threshold" class="col-lg-4 o_light_label" string="Moderate damage (up to)"/>
+                                    <field name="rental_damage_moderate_threshold" class="oe_inline" widget="monetary"/>
+                                </div>
+                                <div class="row mt8 text-muted">
+                                    <div class="col-lg-4"></div>
+                                    <div class="col-lg-8">
+                                        <small>Costs above moderate threshold are classified as severe damage</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Company Settings View Extension -->
+    <record id="view_company_form_qr_logo" model="ir.ui.view">
+        <field name="name">res.company.form.qr.logo</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <!-- Insert QR settings at the end of the main sheet -->
+            <xpath expr="//sheet" position="inside">
+                <group string="QR Code Settings" name="qr_settings" colspan="4">
+                    <group>
+                        <field name="use_qr_logo"/>
+                        <field name="qr_logo" widget="image"
+                            invisible="use_qr_logo == False"/>
+                        <field name="qr_logo_filename" invisible="1"/>
+                    </group>
+                    <group>
+                        <div invisible="use_qr_logo == False">
+                            <p class="text-muted">
+                                <i class="fa fa-info-circle"/>
+                                The logo will be displayed in the center of all QR codes generated for rental items.
+                                <br/>
+                                Recommended: 200x200px PNG with transparent background.
+                            </p>
+                        </div>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Configuration Settings -->
+    <!-- <record id="view_rental_config_settings_qr" model="ir.ui.view">
+        <field name="name">res.config.settings.form.qr</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('settings')]" position="inside">
+                <div class="app_settings_block" data-string="Rental QR Codes" 
+                    string="Rental QR Codes" data-key="rental_management">
+                    <h2>QR Code Settings</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="use_qr_logo"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="use_qr_logo"/>
+                                <div class="text-muted">
+                                    Enable to embed company logo in QR codes
+                                </div>
+                                <div class="content-group" invisible="use_qr_logo == False">
+                                    <div class="mt16">
+                                        <field name="qr_logo" widget="image" class="oe_avatar"/>
+                                        <field name="qr_logo_filename" invisible="1"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record> -->
+</odoo>
+
+<!--
+
+**Key Features:**
+
+1. **Organized in blocks** - Late Fees, Serials, Projects, Notifications, etc.
+2. **Visual grouping** - Related settings together
+3. **Conditional visibility** - Show/hide based on other settings
+4. **Inline explanations** - Help text for each setting
+5. **Smart defaults** - Pre-configured reasonable values
+6. **Monetary widgets** - Proper currency formatting
+7. **Clear labels** - Easy to understand
+8. **Example formats** - Shows how serial numbers will look
+
+**Settings Include:**
+- ✅ Late fee calculation (daily rate + percentage)
+- ✅ Serial number auto-generation
+- ✅ Default rental duration
+- ✅ Signature/photo requirements
+- ✅ Email notifications
+- ✅ Auto-invoice creation
+- ✅ Low stock warnings
+- ✅ Damage classification thresholds
+
+-->

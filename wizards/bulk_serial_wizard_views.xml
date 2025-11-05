@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Bulk Serial Generator Wizard Form -->
+    <record id="view_bulk_serial_wizard_form" model="ir.ui.view">
+        <field name="name">bulk.serial.wizard.form</field>
+        <field name="model">bulk.serial.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generate Serial Numbers">
+                <sheet>
+                    <group>
+                        <field name="equipment_id" readonly="1"/>
+                    </group>
+                    
+                    <group>
+                        <group>
+                            <field name="quantity"/>
+                            <field name="starting_number"/>
+                        </group>
+                        <group>
+                            <field name="prefix_override" 
+                                   placeholder="Leave empty to use equipment code"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Preview" class="mt-3">
+                        <field name="preview_serials" 
+                               nolabel="1" 
+                               readonly="1"
+                               widget="text"
+                               class="text-monospace"/>
+                    </group>
+                    
+                    <div class="alert alert-info mt-3" role="alert">
+                        <i class="fa fa-info-circle"/> 
+                        <strong>Note:</strong> Serial numbers will be created with 'Available' status. 
+                        Duplicates will be automatically skipped.
+                    </div>
+                </sheet>
+                
+                <footer>
+                    <button string="Generate Serials" 
+                            name="action_generate_serials" 
+                            type="object" 
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Wizard Action -->
+    <record id="action_bulk_serial_wizard" model="ir.actions.act_window">
+        <field name="name">Generate Serial Numbers</field>
+        <field name="res_model">bulk.serial.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_rental_equipment"/>
+    </record>
+    
+</odoo>

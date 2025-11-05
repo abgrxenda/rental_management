@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Project List View -->
+    <record id="view_rental_project_list" model="ir.ui.view">
+        <field name="name">rental.project.list</field>
+        <field name="model">rental.project</field>
+        <field name="arch" type="xml">
+            <list string="Rental Projects" 
+                  decoration-danger="is_overdue and state == 'ongoing'"
+                  decoration-info="state == 'reserved'"
+                  decoration-success="state == 'returned'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="name" decoration-bf="1"/>
+                <field name="reference"/>
+                <field name="partner_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="duration_days"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-primary="state == 'reserved'"
+                       decoration-warning="state == 'ongoing'"
+                       decoration-success="state in ['returned', 'invoiced']"
+                       decoration-muted="state == 'cancelled'"/>
+                <field name="has_damage" optional="show" widget="boolean_toggle"/>
+                <field name="grand_total" widget="monetary" sum="Total"/>
+                <field name="is_overdue" column_invisible="1"/>
+                <field name="days_overdue" optional="hide" 
+                       decoration-danger="days_overdue &gt; 0"/>
+                <field name="payment_status" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Project Form View -->
+    <record id="view_rental_project_form" model="ir.ui.view">
+        <field name="name">rental.project.form</field>
+        <field name="model">rental.project</field>
+        <field name="arch" type="xml">
+            <form string="Rental Project">
+                <header>
+                    <button name="action_reserve" 
+                            string="Reserve Equipment" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_start_rental" 
+                            string="Start Rental" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="state != 'reserved'"/>
+                    <button name="action_return" 
+                            string="Return Equipment" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="state != 'ongoing'"/>
+                    <button name="action_create_invoice" 
+                            string="Create Invoice" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="state != 'returned' or invoice_id"/>
+                    <button name="action_view_invoice" 
+                            string="View Invoice" 
+                            type="object"
+                            invisible="not invoice_id"/>
+                    <!-- NEW: Set to Draft button for Reserved state -->
+                    <button name="action_set_to_draft" 
+                            string="Set to Draft" 
+                            type="object"
+                            class="btn-warning"
+                            invisible="state not in ['reserved', 'cancelled']"
+                            confirm="This will release all reserved serials and reset the project to draft. Are you sure?"/>
+                    <button name="action_cancel" 
+                            string="Cancel" 
+                            type="object"
+                            invisible="state in ['returned', 'invoiced', 'cancelled']"
+                            confirm="Are you sure you want to cancel this project?"/>
+                    <field name="state" widget="statusbar" 
+                        statusbar_visible="draft,reserved,ongoing,returned,invoiced"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_invoice" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-pencil-square-o"
+                                invisible="not invoice_id">
+                            <field name="invoice_count" widget="statinfo" string="Invoice"/>
+                        </button>
+                    </div>
+                    
+                    <widget name="web_ribbon" title="Overdue" bg_color="text-bg-danger" 
+                            invisible="not is_overdue or state != 'ongoing'"/>
+                    <widget name="web_ribbon" title="Cancelled" bg_color="text-bg-secondary" 
+                            invisible="state != 'cancelled'"/>
+                    
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group string="Customer Information">
+                            <field name="partner_id" 
+                                   options="{'no_create': True}"
+                                   readonly="state != 'draft'"/>
+                            <field name="partner_email" readonly="1"/>
+                            <field name="partner_phone" readonly="1"/>
+                            <field name="reference"/>
+                        </group>
+                        <group string="Rental Period">
+                            <field name="start_date" readonly="state not in ['draft', 'reserved']"/>
+                            <field name="end_date" readonly="state not in ['draft', 'reserved']"/>
+                            <field name="duration_days"/>
+                            <field name="actual_return_date" readonly="1"
+                                   invisible="not actual_return_date"/>
+                            <field name="days_overdue" 
+                                   invisible="not is_overdue"
+                                   decoration-danger="1"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <group string="Financial">
+                            <field name="total_amount" widget="monetary"/>
+                            <field name="late_fee_enabled" readonly="state != 'draft'"/>
+                            <field name="late_fee_amount" widget="monetary" 
+                                   invisible="late_fee_amount == 0"/>
+                            <field name="has_damage" readonly="1"
+                                   widget="boolean_toggle"/>
+                            <field name="damage_fee" widget="monetary"
+                                   readonly="state not in ['ongoing', 'returned']"/>
+                            <field name="discount_amount" widget="monetary"
+                                   readonly="state not in ['draft', 'reserved']"/>
+                            <field name="grand_total" widget="monetary" class="oe_subtotal_footer_separator"/>
+                        </group>
+                        <group string="Status">
+                            <field name="payment_status"/>
+                            <field name="is_overdue" invisible="1"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Equipment Items" name="items">
+                            <field name="item_ids" 
+                                readonly="state not in ['draft', 'reserved']">
+                                <list editable="bottom">
+                                    <field name="equipment_id" 
+                                        options="{'no_create': True}"
+                                        readonly="parent.state != 'draft'"/>
+                                    <field name="equipment_has_serials" column_invisible="1"/>
+                                    <field name="quantity" 
+                                        readonly="parent.state != 'draft'"/>
+                                    <field name="assigned_serial_count" 
+                                        invisible="not equipment_has_serials"
+                                        readonly="1"/>
+                                    <field name="serial_numbers_text" 
+                                        string="Assigned Serials"
+                                        invisible="not equipment_has_serials"
+                                        readonly="1"
+                                        optional="show"/>
+                                    <field name="assigned_serial_ids" 
+                                        widget="many2many_tags"
+                                        invisible="not equipment_has_serials"
+                                        options="{'no_create': True, 'color_field': 'status'}"
+                                        readonly="parent.state != 'draft'"
+                                        optional="hide"/>
+                                    <field name="unit_price" widget="monetary"/>
+                                    <field name="subtotal" widget="monetary" sum="Subtotal"/>
+                                    <button name="action_assign_serials_wizard" 
+                                            string="Select Serials" 
+                                            type="object" 
+                                            icon="fa-list-ul"
+                                            invisible="not equipment_has_serials or parent.state != 'draft'"
+                                            class="btn-primary"/>
+                                    <button name="action_view_serials" 
+                                            string="View Serials" 
+                                            type="object" 
+                                            icon="fa-eye"
+                                            invisible="not equipment_has_serials"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="total_amount" widget="monetary"/>
+                                <field name="late_fee_amount" widget="monetary" 
+                                    invisible="late_fee_amount == 0"/>
+                                <field name="damage_fee" widget="monetary"
+                                    invisible="damage_fee == 0"/>
+                                <field name="discount_amount" widget="monetary"
+                                    invisible="discount_amount == 0"/>
+                                <div class="oe_subtotal_footer_separator oe_inline">
+                                    <label for="grand_total"/>
+                                    <field name="grand_total" nolabel="1" 
+                                        class="oe_subtotal_footer_separator" 
+                                        widget="monetary"/>
+                                </div>
+                            </group>
+                        </page>
+                        
+                        <page string="Special Requirements" name="requirements">
+                            <group>
+                                <field name="special_programming" 
+                                       placeholder="Special programming or configuration requirements..."/>
+                            </group>
+                        </page>
+                        
+                        <page string="Signatures &amp; Photos" name="documentation">
+                            <group>
+                                <group string="Pickup">
+                                    <field name="pickup_signature" widget="image"/>
+                                    <field name="pickup_signature_date" readonly="1"/>
+                                    <field name="pickup_photos" widget="many2many_binary"/>
+                                </group>
+                                <group string="Return">
+                                    <field name="return_signature" widget="image"/>
+                                    <field name="return_signature_date" readonly="1"/>
+                                    <field name="return_photos" widget="many2many_binary"/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <page string="Documents" name="documents">
+                            <field name="document_ids" widget="many2many_binary"/>
+                        </page>
+                        
+                        <page string="Status History" name="history">
+                            <field name="item_status_ids" readonly="1">
+                                <list>
+                                    <field name="create_date" string="Date"/>
+                                    <field name="equipment_name"/>
+                                    <field name="serial_number"/>
+                                    <field name="status" widget="badge"/>
+                                    <field name="user_id"/>
+                                    <field name="notes"/>
+                                </list>
+                            </field>
+                        </page>
+                        
+                        <page string="Internal Notes" name="notes">
+                            <field name="internal_notes" 
+                                   placeholder="Internal notes (not visible to customer)..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <!-- CHATTER SECTION - Add this entire block -->
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Project Kanban View -->
+    <!-- Project Kanban View with Status Columns -->
+    <record id="view_rental_project_kanban" model="ir.ui.view">
+        <field name="name">rental.project.kanban</field>
+        <field name="model">rental.project</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" 
+                    class="o_kanban_small_column" 
+                    quick_create="false"
+                    on_create="quick_create"
+                    disable_drag_drop="1">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="state" readonly="1"/>
+                <field name="grand_total"/>
+                <field name="is_overdue"/>
+                <field name="days_overdue"/>
+                <field name="color"/>
+                <field name="has_damage"/>
+                
+                <progressbar field="state" 
+                             colors='{"draft": "secondary", "reserved": "info", "ongoing": "warning", "returned": "success", "invoiced": "success", "cancelled": "danger"}'/>
+                
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_card oe_kanban_global_click #{record.is_overdue.raw_value and record.state.raw_value === 'ongoing' ? 'oe_kanban_color_2' : ''}">
+                            <div class="oe_kanban_content">
+                                <!-- Top Section -->
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="name"/>
+                                        </strong>
+                                        <div class="o_kanban_record_subtitle text-muted">
+                                            <i class="fa fa-user"/> <field name="partner_id"/>
+                                        </div>
+                                    </div>
+                                    <div class="o_kanban_record_top_right">
+                                        <field name="reference" invisible="not reference"/>
+                                    </div>
+                                </div>
+                                
+                                <!-- Body Section -->
+                                <div class="o_kanban_record_body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <i class="fa fa-calendar-check-o"/> 
+                                            <span class="text-muted">Start:</span><br/>
+                                            <strong><field name="start_date"/></strong>
+                                        </div>
+                                        <div class="col-6">
+                                            <i class="fa fa-calendar-times-o"/> 
+                                            <span class="text-muted">End:</span><br/>
+                                            <strong><field name="end_date"/></strong>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Overdue Warning -->
+                                    <div t-if="record.is_overdue.raw_value and record.state.raw_value === 'ongoing'" 
+                                         class="alert alert-danger mt-2 mb-0 py-1 px-2">
+                                        <i class="fa fa-exclamation-triangle"/> 
+                                        <strong>Overdue: <field name="days_overdue"/> days</strong>
+                                    </div>
+
+                                    <!-- NEW: Damage Warning -->
+                                    <div t-if="record.has_damage.raw_value" 
+                                         class="alert alert-warning mt-2 mb-0 py-1 px-2">
+                                        <i class="fa fa-wrench"/> 
+                                        <strong>Has Damage: $<field name="damage_fee"/></strong>
+                                    </div>
+                                    
+                                    <!-- Duration -->
+                                    <div class="mt-2">
+                                        <span class="badge badge-pill badge-info">
+                                            <i class="fa fa-clock-o"/> <field name="duration_days"/> days
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Bottom Section -->
+                                <div class="o_kanban_record_bottom mt-2">
+                                    <div class="oe_kanban_bottom_left">
+                                        <strong class="text-primary" style="font-size: 1.1em;">
+                                            <field name="grand_total" widget="monetary"/>
+                                        </strong>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="activity_ids" widget="kanban_activity"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Project Search View -->
+    <record id="view_rental_project_search" model="ir.ui.view">
+        <field name="name">rental.project.search</field>
+        <field name="model">rental.project</field>
+        <field name="arch" type="xml">
+            <search string="Search Projects">
+                <field name="name" string="Project"/>
+                <field name="reference"/>
+                <field name="partner_id" string="Customer"/>
+                
+                <filter string="Draft" name="draft" 
+                        domain="[('state', '=', 'draft')]"/>
+                <filter string="Reserved" name="reserved" 
+                        domain="[('state', '=', 'reserved')]"/>
+                <filter string="Ongoing" name="ongoing" 
+                        domain="[('state', '=', 'ongoing')]"/>
+                <filter string="Returned" name="returned" 
+                        domain="[('state', '=', 'returned')]"/>
+                <filter string="Invoiced" name="invoiced" 
+                        domain="[('state', '=', 'invoiced')]"/>
+                <filter string="Cancelled" name="cancelled" 
+                        domain="[('state', '=', 'cancelled')]"/>
+                
+                <separator/>
+                <filter string="Overdue" name="overdue" 
+                        domain="[('is_overdue', '=', True), ('state', '=', 'ongoing')]"/>
+                <filter string="This Month" name="this_month" 
+                        domain="[('start_date', '&gt;=', (context_today() - relativedelta(day=1)).strftime('%Y-%m-%d')),
+                                 ('start_date', '&lt;=', (context_today() + relativedelta(day=31)).strftime('%Y-%m-%d'))]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Customer" name="group_customer" 
+                            context="{'group_by': 'partner_id'}"/>
+                    <filter string="Status" name="group_status" 
+                            context="{'group_by': 'state'}"/>
+                    <filter string="Start Date" name="group_start_date" 
+                            context="{'group_by': 'start_date'}"/>
+                    <filter string="Payment Status" name="group_payment" 
+                            context="{'group_by': 'payment_status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Main Project Action -->
+    <record id="action_rental_project" model="ir.actions.act_window">
+        <field name="name">Rental Projects</field>
+        <field name="res_model">rental.project</field>
+        <field name="view_mode">kanban,list,form</field>  <!-- Kanban first -->
+        <field name="context">{'group_by': 'state'}</field>  <!-- Group by state by default -->
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first rental project
+            </p>
+            <p>
+                A rental project represents a booking where customers rent equipment
+                for a specific period. You can track equipment, dates, pricing,
+                and the full rental lifecycle from reservation to return.
+            </p>
+        </field>
+    </record>
+    
+    <!-- Filtered Project Actions -->
+    <record id="action_rental_project_draft" model="ir.actions.act_window">
+        <field name="name">Draft Projects</field>
+        <field name="res_model">rental.project</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="context">{'search_default_draft': 1}</field>
+        <field name="domain">[('state', '=', 'draft')]</field>
+    </record>
+    
+    <record id="action_rental_project_ongoing" model="ir.actions.act_window">
+        <field name="name">Ongoing Rentals</field>
+        <field name="res_model">rental.project</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="context">{'search_default_ongoing': 1}</field>
+        <field name="domain">[('state', '=', 'ongoing')]</field>
+    </record>
+    
+    <record id="action_rental_project_overdue" model="ir.actions.act_window">
+        <field name="name">Overdue Rentals</field>
+        <field name="res_model">rental.project</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="context">{'search_default_overdue': 1}</field>
+        <field name="domain">[('is_overdue', '=', True), ('state', '=', 'ongoing')]</field>
+    </record>
+
+    <!-- Add QR Scanner button to Project Form View -->
+    <!-- <record id="view_rental_project_form_qr_button" model="ir.ui.view">
+        <field name="name">rental.project.form.qr.button</field>
+        <field name="model">rental.project</field>
+        <field name="inherit_id" ref="rental_management.view_rental_project_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="%(rental_management.action_rental_qr_scanner)d" 
+                        string="Scan Item" 
+                        type="action" 
+                        class="btn-primary"
+                        context="{'default_scan_type': 'add_to_project', 'default_project_id': id}"
+                        groups="rental_management.group_rental_user"/>
+            </xpath>
+        </field>
+    </record> -->
+
+</odoo>
+
+<!-- 
+**Key Features:**
+
+1. ✅ **Uses `<list>` not `<tree>`** - Odoo 18 compliant
+2. **Complete workflow** - Buttons for Reserve → Start → Return → Invoice
+3. **Color-coded rows** - Overdue (red), Reserved (blue), Returned (green)
+4. **Status bar** - Visual workflow progress
+5. **Ribbons** - "Overdue" and "Cancelled" ribbons
+6. **Smart buttons** - Invoice count
+7. **Financial totals** - Subtotals, late fees, damage fees
+8. **Inline item editing** - Add/edit equipment directly
+9. **Serial tracking** - View assigned serials per item
+10. **Signatures & photos** - Pickup and return documentation
+11. **Status history** - Complete audit trail
+12. **Kanban board** - Drag-and-drop by state
+13. **Chatter integration** - Activities and messages
+14. **Pre-filtered views** - Draft, Ongoing, Overdue
+-->

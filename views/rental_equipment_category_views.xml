@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Category List View (was Tree in v17) -->
+    <record id="view_rental_equipment_category_list" model="ir.ui.view">
+        <field name="name">rental.equipment.category.list</field>
+        <field name="model">rental.equipment.category</field>
+        <field name="arch" type="xml">
+            <list string="Equipment Categories">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="parent_id"/>
+                <field name="is_attribute_group"/>
+                <field name="equipment_count"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Category Form View -->
+    <record id="view_rental_equipment_category_form" model="ir.ui.view">
+        <field name="name">rental.equipment.category.form</field>
+        <field name="model">rental.equipment.category</field>
+        <field name="arch" type="xml">
+            <form string="Equipment Category">
+                <sheet>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="Category Name"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="parent_id" 
+                                   options="{'no_create': True}"
+                                   domain="[('id', '!=', id)]"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="is_attribute_group"/>
+                            <field name="selection_mode" 
+                                   invisible="not is_attribute_group"/>
+                            <field name="equipment_count"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Description" name="description">
+                            <field name="description" placeholder="Category description..."/>
+                        </page>
+                        
+                        <page string="Sub-Categories" name="children">
+                            <field name="child_ids">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="equipment_count"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Category Search View -->
+    <record id="view_rental_equipment_category_search" model="ir.ui.view">
+        <field name="name">rental.equipment.category.search</field>
+        <field name="model">rental.equipment.category</field>
+        <field name="arch" type="xml">
+            <search string="Search Categories">
+                <field name="name" string="Category"/>
+                <field name="parent_id"/>
+                
+                <filter string="Active" name="active" 
+                        domain="[('active', '=', True)]"/>
+                <filter string="Inactive" name="inactive" 
+                        domain="[('active', '=', False)]"/>
+                
+                <separator/>
+                <filter string="Top Level" name="top_level" 
+                        domain="[('parent_id', '=', False)]"/>
+                <filter string="Attribute Groups" name="attribute_groups" 
+                        domain="[('is_attribute_group', '=', True)]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Parent Category" name="group_parent" 
+                            context="{'group_by': 'parent_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Category Kanban View -->
+    <record id="view_rental_equipment_category_kanban" model="ir.ui.view">
+        <field name="name">rental.equipment.category.kanban</field>
+        <field name="model">rental.equipment.category</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="image"/>
+                <field name="equipment_count"/>
+                <field name="is_attribute_group"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_image">
+                                <img t-att-src="kanban_image('rental.equipment.category', 'image', record.id.raw_value)" 
+                                     alt="Category" class="o_image_64_cover"/>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title">
+                                    <field name="name"/>
+                                </strong>
+                                <div class="o_kanban_record_subtitle">
+                                    <field name="parent_id"/>
+                                </div>
+                                <div class="o_kanban_tags_section">
+                                    <span t-if="record.is_attribute_group.raw_value" 
+                                          class="badge badge-pill">Attribute Group</span>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <field name="equipment_count"/> Equipment
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    
+    <!-- Category Action -->
+    <record id="action_rental_equipment_category" model="ir.actions.act_window">
+        <field name="name">Equipment Categories</field>
+        <field name="res_model">rental.equipment.category</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first equipment category
+            </p>
+            <p>
+                Categories help organize your rental equipment into logical groups.
+                You can create hierarchical categories (e.g., Electronics > Laptops)
+                and use attribute groups for equipment features.
+            </p>
+        </field>
+    </record>
+    
+</odoo>
+
+<!-- 
+Key Features:
+
+Tree View - Drag-and-drop ordering with handle widget
+Form View - Avatar image, hierarchical parent selection
+Kanban View - Visual card layout with images
+Search Filters - Active/Inactive, Top Level, Attribute Groups
+Sub-categories Tab - Manage child categories inline
+Equipment Count - Shows how many items in each category
+Attribute Group Support - Special category type for features
+Help Message - Guidance for first-time users
+-->

@@ -1,0 +1,349 @@
+/* QR Scanner Styles - Mobile Optimized */
+
+.rental_qr_scanner {
+    width: 100%;
+    height: 100vh;
+    background: #f8f9fa;
+    overflow-y: auto;
+}
+
+.scanner-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 15px;
+    background: white;
+    min-height: 100vh;
+}
+
+/* Header */
+.scanner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 2px solid #e9ecef;
+    margin-bottom: 20px;
+}
+
+.scanner-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+/* Controls */
+.scanner-controls {
+    margin-bottom: 20px;
+}
+
+.scanner-controls .form-group {
+    margin-bottom: 15px;
+}
+
+.scanner-controls label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.scanner-controls select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+/* Camera Viewport */
+.scanner-viewport {
+    position: relative;
+    width: 100%;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.scanner-video {
+    width: 100%;
+    height: auto;
+    display: block;
+    min-height: 300px;
+    max-height: 60vh;
+    object-fit: cover;
+}
+
+.scanner-video.active {
+    display: block;
+}
+
+/* Scanner Overlay */
+.scanner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    pointer-events: none;
+}
+
+.scanner-frame {
+    width: 250px;
+    height: 250px;
+    border: 3px solid rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    box-shadow: 
+        0 0 0 2000px rgba(0, 0, 0, 0.3),
+        inset 0 0 20px rgba(255, 255, 255, 0.3);
+    position: relative;
+    animation: scan-pulse 2s ease-in-out infinite;
+}
+
+/* Corner decorations for scanner frame */
+.scanner-frame::before,
+.scanner-frame::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border: 4px solid #4CAF50;
+}
+
+.scanner-frame::before {
+    top: -4px;
+    left: -4px;
+    border-right: none;
+    border-bottom: none;
+    border-top-left-radius: 12px;
+}
+
+.scanner-frame::after {
+    top: -4px;
+    right: -4px;
+    border-left: none;
+    border-bottom: none;
+    border-top-right-radius: 12px;
+}
+
+.scanner-frame {
+    /* Add bottom corners with pseudo-element siblings if needed */
+}
+
+@keyframes scan-pulse {
+    0%, 100% {
+        box-shadow: 
+            0 0 0 2000px rgba(0, 0, 0, 0.3),
+            inset 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+    50% {
+        box-shadow: 
+            0 0 0 2000px rgba(0, 0, 0, 0.3),
+            inset 0 0 30px rgba(76, 175, 80, 0.5);
+    }
+}
+
+.scanner-instructions {
+    margin-top: 20px;
+    color: white;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.scanner-instructions p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Scanner Button */
+.scanner-button-container {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.scanner-button-container .btn {
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 50px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+}
+
+.scanner-button-container .btn i {
+    margin-right: 8px;
+}
+
+/* Result Display */
+.scanner-result {
+    margin-top: 20px;
+}
+
+.scanner-result .alert {
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+}
+
+.scanner-result .alert h4 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.scanner-result .alert h4 i {
+    margin-right: 10px;
+    font-size: 24px;
+}
+
+.scanner-result .item-info {
+    margin-top: 15px;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.scanner-result .item-info table {
+    margin-bottom: 0;
+}
+
+.scanner-result .item-info th {
+    width: 40%;
+    font-weight: 600;
+    padding: 8px;
+}
+
+.scanner-result .item-info td {
+    padding: 8px;
+}
+
+/* Badge Styles */
+.badge {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 576px) {
+    .scanner-container {
+        padding: 10px;
+    }
+    
+    .scanner-header h3 {
+        font-size: 1.25rem;
+    }
+    
+    .scanner-frame {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .scanner-button-container .btn {
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+    
+    .scanner-result .alert h4 {
+        font-size: 16px;
+    }
+}
+
+/* Landscape Mode on Mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+    .scanner-video {
+        max-height: 70vh;
+    }
+    
+    .scanner-frame {
+        width: 180px;
+        height: 180px;
+    }
+    
+    .scanner-button-container {
+        bottom: 10px;
+    }
+}
+
+/* Loading State */
+.scanner-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #6c757d;
+}
+
+.scanner-loading i {
+    font-size: 32px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Camera Permission Prompt */
+.camera-permission-prompt {
+    text-align: center;
+    padding: 40px 20px;
+    background: #fff3cd;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.camera-permission-prompt i {
+    font-size: 48px;
+    color: #856404;
+    margin-bottom: 15px;
+}
+
+.camera-permission-prompt h4 {
+    color: #856404;
+    margin-bottom: 10px;
+}
+
+.camera-permission-prompt p {
+    color: #856404;
+    margin-bottom: 0;
+}

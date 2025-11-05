@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Default Equipment Categories -->
+        <record id="category_electronics" model="rental.equipment.category">
+            <field name="name">Electronics</field>
+            <field name="sequence">10</field>
+        </record>
+        
+        <record id="category_tools" model="rental.equipment.category">
+            <field name="name">Tools &amp; Equipment</field>
+            <field name="sequence">20</field>
+        </record>
+        
+        <record id="category_vehicles" model="rental.equipment.category">
+            <field name="name">Vehicles</field>
+            <field name="sequence">30</field>
+        </record>
+        
+        <record id="category_furniture" model="rental.equipment.category">
+            <field name="name">Furniture</field>
+            <field name="sequence">40</field>
+        </record>
+        
+        <!-- Sub-categories for Electronics -->
+        <record id="category_laptops" model="rental.equipment.category">
+            <field name="name">Laptops</field>
+            <field name="parent_id" ref="category_electronics"/>
+            <field name="sequence">1</field>
+        </record>
+        
+        <record id="category_projectors" model="rental.equipment.category">
+            <field name="name">Projectors</field>
+            <field name="parent_id" ref="category_electronics"/>
+            <field name="sequence">2</field>
+        </record>
+        
+        <record id="category_cameras" model="rental.equipment.category">
+            <field name="name">Cameras</field>
+            <field name="parent_id" ref="category_electronics"/>
+            <field name="sequence">3</field>
+        </record>
+        
+        <!-- Sub-categories for Tools -->
+        <record id="category_power_tools" model="rental.equipment.category">
+            <field name="name">Power Tools</field>
+            <field name="parent_id" ref="category_tools"/>
+            <field name="sequence">1</field>
+        </record>
+        
+        <record id="category_construction" model="rental.equipment.category">
+            <field name="name">Construction Equipment</field>
+            <field name="parent_id" ref="category_tools"/>
+            <field name="sequence">2</field>
+        </record>
+        
+        <!-- Attribute Groups (from your categorygroup concept) -->
+        <record id="attribute_group_connectivity" model="rental.equipment.category">
+            <field name="name">Connectivity Options</field>
+            <field name="is_attribute_group">True</field>
+            <field name="selection_mode">multiple</field>
+            <field name="sequence">100</field>
+        </record>
+        
+        <record id="attribute_wifi" model="rental.equipment.category">
+            <field name="name">WiFi</field>
+            <field name="parent_id" ref="attribute_group_connectivity"/>
+            <field name="sequence">1</field>
+        </record>
+        
+        <record id="attribute_bluetooth" model="rental.equipment.category">
+            <field name="name">Bluetooth</field>
+            <field name="parent_id" ref="attribute_group_connectivity"/>
+            <field name="sequence">2</field>
+        </record>
+        
+        <record id="attribute_hdmi" model="rental.equipment.category">
+            <field name="name">HDMI</field>
+            <field name="parent_id" ref="attribute_group_connectivity"/>
+            <field name="sequence">3</field>
+        </record>
+        
+        <!-- Default Configuration Settings -->
+        <record id="default_late_fee_settings" model="ir.config_parameter">
+            <field name="key">rental.default_late_fee_enabled</field>
+            <field name="value">True</field>
+        </record>
+        
+        <record id="default_late_fee_daily_rate" model="ir.config_parameter">
+            <field name="key">rental.late_fee_daily_rate</field>
+            <field name="value">50.0</field>
+        </record>
+        
+        <record id="default_late_fee_percentage" model="ir.config_parameter">
+            <field name="key">rental.late_fee_percentage</field>
+            <field name="value">5.0</field>
+        </record>
+        
+        <record id="default_late_fee_calculation" model="ir.config_parameter">
+            <field name="key">rental.late_fee_calculation_method</field>
+            <field name="value">maximum</field>
+        </record>
+        
+        <record id="default_rental_duration" model="ir.config_parameter">
+            <field name="key">rental.default_rental_duration</field>
+            <field name="value">7</field>
+        </record>
+        
+        <record id="default_require_signature" model="ir.config_parameter">
+            <field name="key">rental.require_signature</field>
+            <field name="value">True</field>
+        </record>
+        
+        <record id="default_send_reminder" model="ir.config_parameter">
+            <field name="key">rental.send_reminder_email</field>
+            <field name="value">True</field>
+        </record>
+        
+        <record id="default_reminder_days" model="ir.config_parameter">
+            <field name="key">rental.reminder_days_before</field>
+            <field name="value">2</field>
+        </record>
+        
+        <record id="default_low_stock_threshold" model="ir.config_parameter">
+            <field name="key">rental.low_stock_threshold</field>
+            <field name="value">3</field>
+        </record>
+        
+        <record id="default_damage_minor_threshold" model="ir.config_parameter">
+            <field name="key">rental.damage_minor_threshold</field>
+            <field name="value">100.0</field>
+        </record>
+        
+        <record id="default_damage_moderate_threshold" model="ir.config_parameter">
+            <field name="key">rental.damage_moderate_threshold</field>
+            <field name="value">500.0</field>
+        </record>
+        
+    </data>
+</odoo>
+
+<!-- 
+Data Includes:
+
+Default Categories - Electronics, Tools, Vehicles, Furniture
+Sub-categories - Laptops, Projectors, Power Tools, etc.
+Attribute Groups - Connectivity options (WiFi, Bluetooth, HDMI)
+System Settings - Late fees ($50/day or 5%), reminder settings, thresholds
+Business Logic Defaults - 7-day default rental, 3 units low stock warning
+-->

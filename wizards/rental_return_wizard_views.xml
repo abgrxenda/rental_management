@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Return Wizard Form View -->
+    <record id="view_rental_return_wizard_form" model="ir.ui.view">
+        <field name="name">rental.return.wizard.form</field>
+        <field name="model">rental.return.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Return Equipment">
+                <sheet>
+                    <div class="alert alert-info" role="alert">
+                        <h4>
+                            <i class="fa fa-info-circle"/> Return Equipment Assessment
+                        </h4>
+                        <p>
+                            Please inspect each item and record its condition.
+                            Damage fees will be automatically calculated based on the condition.
+                        </p>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="project_id" readonly="1"/>
+                            <field name="actual_return_date"/>
+                        </group>
+                        <group>
+                            <field name="has_damage" readonly="1"/>
+                            <field name="total_damage_fee" widget="monetary" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Items to Return" name="items">
+                            <field name="item_line_ids" nolabel="1">
+                                <list editable="bottom" create="0" delete="0">
+                                    <field name="equipment_id" readonly="1" force_save="1"/>
+                                    <field name="serial_id" readonly="1" force_save="1" invisible="not serial_id"/>
+                                    <field name="quantity" readonly="1" invisible="serial_id"/>
+                                    <field name="condition"/>
+                                    <field name="damage_description" 
+                                           optional="hide"
+                                           placeholder="Describe damage..."/>
+                                    <field name="damage_fee" 
+                                           widget="monetary"
+                                           sum="Total"/>
+                                </list>
+                            </field>
+                        </page>
+                        
+                        <page string="Signature &amp; Photos" name="signature">
+                            <group>
+                                <group string="Customer Signature">
+                                    <field name="return_signature" widget="image" nolabel="1"/>
+                                </group>
+                                <group string="Return Photos">
+                                    <field name="return_photos" widget="many2many_binary" nolabel="1"/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <page string="Notes" name="notes">
+                            <field name="notes" 
+                                   placeholder="Additional return notes..."
+                                   nolabel="1"/>
+                        </page>
+                    </notebook>
+                    
+                    <group>
+                        <group>
+                            <label for="total_damage_fee" class="font-weight-bold"/>
+                            <div class="o_row">
+                                <field name="total_damage_fee" 
+                                       widget="monetary" 
+                                       class="oe_subtotal_footer_separator"
+                                       nolabel="1"/>
+                            </div>
+                        </group>
+                    </group>
+                </sheet>
+                
+                <footer>
+                    <button string="Complete Return" 
+                            name="action_complete_return" 
+                            type="object" 
+                            class="btn-primary"/>
+                    <button string="Cancel" 
+                            class="btn-secondary" 
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Return Wizard Action -->
+    <record id="action_rental_return_wizard" model="ir.actions.act_window">
+        <field name="name">Return Equipment</field>
+        <field name="res_model">rental.return.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_rental_project"/>
+    </record>
+    
+</odoo>
+
+<!-- 
+Key Features:
+
+Equipment assessment table - Check each item/serial individually
+Color-coded conditions - Green (good), Yellow (minor), Red (damaged/lost)
+Editable list - Quick inline editing
+Signature capture - Image widget for signature
+Photo upload - Many2many binary widget for multiple photos
+Notes section - Free-text notes about return
+Total damage fee - Auto-calculated from lines
+Modal dialog - Opens as popup (target="new") 
+-->

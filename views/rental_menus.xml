@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Main Rental Menu (Root) -->
+    <menuitem id="menu_rental_root"
+              name="Equipment Rental"
+              sequence="10"
+              web_icon="rental_management,static/description/icon.png"/>
+    
+    <!-- Projects Section -->
+    <menuitem id="menu_rental_projects"
+              name="Projects"
+              parent="menu_rental_root"
+              sequence="10"/>
+    
+    <menuitem id="menu_rental_project_all"
+              name="All Projects"
+              parent="menu_rental_projects"
+              action="action_rental_project"
+              sequence="10"/>
+    
+    <menuitem id="menu_rental_project_draft"
+              name="Draft"
+              parent="menu_rental_projects"
+              action="action_rental_project_draft"
+              sequence="20"/>
+    
+    <menuitem id="menu_rental_project_ongoing"
+              name="Ongoing Rentals"
+              parent="menu_rental_projects"
+              action="action_rental_project_ongoing"
+              sequence="30"/>
+    
+    <menuitem id="menu_rental_project_overdue"
+              name="Overdue"
+              parent="menu_rental_projects"
+              action="action_rental_project_overdue"
+              sequence="40"/>
+    
+    <!-- Equipment Section -->
+    <menuitem id="menu_rental_equipment"
+              name="Equipment"
+              parent="menu_rental_root"
+              sequence="20"/>
+    
+    <menuitem id="menu_rental_equipment_all"
+              name="All Equipment"
+              parent="menu_rental_equipment"
+              action="action_rental_equipment"
+              sequence="10"/>
+    
+    <menuitem id="menu_rental_equipment_serials"
+              name="Serial Numbers"
+              parent="menu_rental_equipment"
+              action="action_rental_equipment_serial"
+              sequence="20"/>
+    
+    <menuitem id="menu_rental_equipment_categories"
+              name="Categories"
+              parent="menu_rental_equipment"
+              action="action_rental_equipment_category"
+              sequence="30"/>
+
+    <!-- Configuration Section -->
+    <menuitem id="menu_rental_configuration"
+              name="Configuration"
+              parent="menu_rental_root"
+              sequence="100"/>
+
+   <!-- QR Scanner Menu -->
+   <!-- <menuitem id="menu_rental_qr_scanner"
+            name="QR Scanner"
+            parent="menu_rental_root"
+            action="action_rental_qr_scanner"
+            sequence="5"/> -->
+
+</odoo>
+
+<!-- 
+
+**Menu Structure:**
+
+```
+📦 Rental
+├─ 📁 Projects
+│  ├─ All Projects
+│  ├─ Draft
+│  ├─ Ongoing Rentals
+│  └─ Overdue
+│
+├─ 📁 Equipment
+│  ├─ All Equipment
+│  ├─ Serial Numbers
+│  └─ Categories
+│
+├─ 📁 Reports
+│  └─ Status History
+│
+└─ 📁 Configuration (Managers only)
+   └─ Settings
+```
+
+**Features:**
+- Clean hierarchical structure
+- Quick access to filtered views (Draft, Ongoing, Overdue)
+- Equipment management in one section
+- Reports separate from operations
+- Settings restricted to managers
+
+-->

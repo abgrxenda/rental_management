@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Equipment List View -->
+    <record id="view_rental_equipment_list" model="ir.ui.view">
+        <field name="name">rental.equipment.list</field>
+        <field name="model">rental.equipment</field>
+        <field name="arch" type="xml">
+            <list string="Equipment">
+                <field name="sequence" widget="handle"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="category_ids" widget="many2many_tags" optional="show"/>
+                <field name="has_serials" optional="hide"/>
+                <field name="total_stock" optional="show"/>
+                <field name="available_stock"
+                       decoration-danger="available_stock == 0"/>
+                <field name="rented_stock" optional="hide"/>
+                <field name="daily_rate" widget="monetary" optional="show"/>
+                <field name="weekly_rate" widget="monetary" optional="hide"/>
+                <field name="monthly_rate" widget="monetary" optional="hide"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Equipment Form View -->
+    <record id="view_rental_equipment_form" model="ir.ui.view">
+        <field name="name">rental.equipment.form</field>
+        <field name="model">rental.equipment</field>
+        <field name="arch" type="xml">
+            <form string="Equipment">
+                <header>
+                    <button name="action_view_serials"
+                            type="object"
+                            string="View Serials"
+                            class="oe_highlight"
+                            invisible="not has_serials"/>
+                        <button name="action_open_bulk_serial_wizard"
+                            type="object"
+                            string="Generate Serials"
+                            class="btn-primary"
+                            invisible="not has_serials"
+                            groups="rental_management.group_rental_manager"/>
+                    <button name="action_view_rental_history"
+                            type="object"
+                            string="Rental History"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="image" widget="image" class="oe_avatar" options="{'zoom': true}"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="Equipment Name"/>
+                        </h1>
+                        <h3>
+                            <field name="code" placeholder="Equipment Code" readonly="1"/>
+                        </h3>
+                    </div>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="category_ids" widget="many2many_tags"/>
+                            <field name="item_value" widget="monetary"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Serial Tracking">
+                            <field name="has_serials"/>
+                            <field name="auto_generate_serials" invisible="not has_serials"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Stock Information">
+                            <field name="total_stock"/>
+                            <field name="available_stock"/>
+                            <field name="reserved_stock"/>
+                            <field name="rented_stock"/>
+                        </group>
+                        <group string="Rental Rates">
+                            <field name="daily_rate" widget="monetary"/>
+                            <field name="weekly_rate" widget="monetary"/>
+                            <field name="monthly_rate" widget="monetary"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description" name="description">
+                            <field name="description" placeholder="Detailed equipment description..."/>
+                        </page>
+                        <page string="Serial Numbers" name="serials" invisible="not has_serials">
+                            <field name="serial_ids">
+                                <list editable="bottom">
+                                    <field name="serial_number"/>
+                                    <field name="status" widget="badge"
+                                           decoration-success="status == 'available'"
+                                           decoration-info="status == 'reserved'"
+                                           decoration-warning="status in ['rented', 'returned']"
+                                           decoration-danger="status in ['damaged', 'disposed']"/>
+                                    <field name="current_project_id" optional="hide"/>
+                                    <field name="programming_config" optional="hide"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Internal Notes" name="notes">
+                            <field name="notes" placeholder="Internal notes about this equipment..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <!-- CHATTER SECTION - Add this entire block -->
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Equipment Kanban View -->
+    <record id="view_rental_equipment_kanban" model="ir.ui.view">
+        <field name="name">rental.equipment.kanban</field>
+        <field name="model">rental.equipment</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="id"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="image"/>
+                <field name="available_stock"/>
+                <field name="total_stock"/>
+                <field name="rented_stock"/>
+                <field name="daily_rate"/>
+                <field name="has_serials"/>
+                <field name="category_ids"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_image">
+                                <img t-attf-src="/web/image/rental.equipment/#{record.id}/image"
+                                     alt="Equipment" class="o_image_64_cover"/>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title">
+                                    <field name="name"/>
+                                </strong>
+                                <div class="o_kanban_record_subtitle">
+                                    <field name="code"/>
+                                </div>
+                                <ul class="o_kanban_record_body">
+                                    <li>Available: <field name="available_stock"/> / <field name="total_stock"/></li>
+                                    <li>Rented: <field name="rented_stock"/></li>
+                                    <li>Rate: <field name="daily_rate"/> / day</li>
+                                </ul>
+                                <div class="o_kanban_tags_section">
+                                    <field name="category_ids" widget="many2many_tags"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Equipment Search View -->
+    <record id="view_rental_equipment_search" model="ir.ui.view">
+        <field name="name">rental.equipment.search</field>
+        <field name="model">rental.equipment</field>
+        <field name="arch" type="xml">
+            <search string="Search Equipment">
+                <field name="name" string="Equipment"/>
+                <field name="code"/>
+                <field name="category_ids"/>
+                <filter string="Active" name="active"
+                        domain="[('active', '=', True)]"/>
+                <filter string="Inactive" name="inactive"
+                        domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter string="Available" name="available"
+                        domain="[('available_stock', '>', 0)]"/>
+                <filter string="Out of Stock" name="out_of_stock"
+                        domain="[('available_stock', '=', 0)]"/>
+                <filter string="Low Stock" name="low_stock"
+                        domain="[('available_stock', '=', 5), ('available_stock', '=', 4)]"/>
+                <filter string="Currently Rented" name="rented"
+                        domain="[('rented_stock', '>', 0)]"/>
+                <separator/>
+                <filter string="With Serials" name="with_serials"
+                        domain="[('has_serials', '=', True)]"/>
+                <filter string="Without Serials" name="without_serials"
+                        domain="[('has_serials', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Category" name="group_category"
+                            context="{'group_by': 'category_ids'}"/>
+                    <filter string="Has Serials" name="group_serials"
+                            context="{'group_by': 'has_serials'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Equipment Action -->
+    <record id="action_rental_equipment" model="ir.actions.act_window">
+        <field name="name">Equipment</field>
+        <field name="res_model">rental.equipment</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'search_default_active': 1, 'search_default_available': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add your first equipment item
+            </p>
+            <p>
+                Equipment items are the products you rent out to customers.
+                You can track serial numbers for individual units and set different
+                rental rates (daily, weekly, monthly).
+            </p>
+        </field>
+    </record>
+</odoo>
+
+<!-- 
+Key Features:
+
+✅ Uses <list> not <tree> - Odoo 18 compliant
+Stock warnings - Color-coded availability (red/yellow)
+Smart buttons - View Serials, Rental History
+Ribbon widget - Shows "Archived" for inactive items
+Inline serial editing - Edit serials directly in form
+Chatter integration - Activity tracking and messages
+Rich search filters - Available, Low Stock, Rented, etc.
+Kanban cards - Visual overview with images
+Optional fields - Hide/show columns as needed
+Badge widgets - Color-coded serial statuses
+-->

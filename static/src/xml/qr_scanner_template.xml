@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- QR Scanner Client Action Template -->
+    <t t-name="rental_management.QRScannerTemplate">
+        <div class="rental_qr_scanner">
+            <div class="scanner-container">
+                <!-- Header -->
+                <div class="scanner-header">
+                    <h3>QR Code Scanner</h3>
+                    <button class="btn btn-secondary btn-sm" t-on-click="() => this.env.services.action.doAction({type: 'ir.actions.act_window_close'})">
+                        <i class="fa fa-times"/> Close
+                    </button>
+                </div>
+                
+                <!-- Scan Type Selection -->
+                <div class="scanner-controls">
+                    <div class="form-group">
+                        <label for="scan-type">Action:</label>
+                        <select id="scan-type" class="form-control" t-on-change="onScanTypeChange" t-model="state.scanType">
+                            <option value="verify">Verify Item</option>
+                            <option value="add_to_project">Add to Project</option>
+                            <option value="handover">Handover to Customer</option>
+                            <option value="return">Return from Customer</option>
+                            <option value="damaged">Report Damaged</option>
+                            <option value="repair">Send to Repair</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Camera Selection -->
+                    <div class="form-group" t-if="state.videoDevices.length > 1">
+                        <label for="camera-select">Camera:</label>
+                        <select id="camera-select" class="form-control" t-on-change="onCameraChange" t-model="state.selectedCamera">
+                            <t t-foreach="state.videoDevices" t-as="device" t-key="device.deviceId">
+                                <option t-att-value="device.deviceId" t-esc="device.label || 'Camera ' + (device_index + 1)"/>
+                            </t>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Camera View -->
+                <div class="scanner-viewport">
+                    <video id="qr-video" class="scanner-video" t-att-class="{'active': state.cameraActive}"/>
+                    <canvas id="qr-canvas" style="display: none;"/>
+                    
+                    <!-- Overlay Frame -->
+                    <div class="scanner-overlay" t-if="state.cameraActive">
+                        <div class="scanner-frame"/>
+                        <div class="scanner-instructions">
+                            <p>Point camera at QR code</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Start/Stop Button -->
+                    <div class="scanner-button-container">
+                        <button class="btn btn-lg" 
+                                t-att-class="state.cameraActive ? 'btn-danger' : 'btn-primary'"
+                                t-on-click="startScanning">
+                            <i t-att-class="state.cameraActive ? 'fa fa-stop' : 'fa fa-camera'"/>
+                            <t t-if="state.cameraActive">Stop Scanning</t>
+                            <t t-else="">Start Scanning</t>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Scan Result -->
+                <div class="scanner-result" t-if="state.scanResult">
+                    <div class="alert" 
+                         t-att-class="'alert-' + (state.scanResult.status === 'success' ? 'success' : 
+                                                    state.scanResult.status === 'error' ? 'danger' : 
+                                                    state.scanResult.status === 'warning' ? 'warning' : 'info')">
+                        <button type="button" class="close" t-on-click="clearResult">
+                            <span>×</span>
+                        </button>
+                        <h4>
+                            <i t-att-class="'fa ' + (state.scanResult.status === 'success' ? 'fa-check-circle' : 
+                                                      state.scanResult.status === 'error' ? 'fa-times-circle' : 
+                                                      state.scanResult.status === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle')"/>
+                            <t t-esc="state.scanResult.message"/>
+                        </h4>
+                        
+                        <!-- Item Information -->
+                        <div class="item-info" t-if="state.scanResult.item_info">
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>Serial Number:</th>
+                                    <td t-esc="state.scanResult.item_info.serial_number"/>
+                                </tr>
+                                <tr>
+                                    <th>Item:</th>
+                                    <td t-esc="state.scanResult.item_info.item_name"/>
+                                </tr>
+                                <tr>
+                                    <th>Status:</th>
+                                    <td>
+                                        <span class="badge" 
+                                              t-att-class="'badge-' + (state.scanResult.item_info.status === 'available' ? 'success' : 
+                                                                        state.scanResult.item_info.status === 'rented' ? 'primary' : 
+                                                                        state.scanResult.item_info.status === 'damaged' ? 'danger' : 'secondary')">
+                                            <t t-esc="state.scanResult.item_info.status_display"/>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr t-if="state.scanResult.item_info.current_rental">
+                                    <th>Current Rental:</th>
+                                    <td t-esc="state.scanResult.item_info.current_rental"/>
+                                </tr>
+                                <tr t-if="state.scanResult.item_info.location">
+                                    <th>Location:</th>
+                                    <td t-esc="state.scanResult.item_info.location"/>
+                                </tr>
+                                <tr t-if="state.scanResult.item_info.condition">
+                                    <th>Condition:</th>
+                                    <td t-esc="state.scanResult.item_info.condition"/>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+    
+    <!-- Standalone Scanner Page (for direct access) -->
+    <t t-name="rental_management.qr_scanner_template">
+        <t t-call="web.layout">
+            <t t-set="head">
+                <script type="text/javascript" src="/rental_management/static/lib/jsQR/jsQR.js"/>
+                <link rel="stylesheet" href="/rental_management/static/src/css/qr_scanner.css"/>
+            </t>
+            <div class="container-fluid mt-3">
+                <div class="row">
+                    <div class="col-12">
+                        <div id="qr-scanner-mount-point"/>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                odoo.define('rental_management.scanner_init', function(require) {
+                    'use strict';
+                    
+                    const core = require('web.core');
+                    const SystrayMenu = require('web.SystrayMenu');
+                    const Widget = require('web.Widget');
+                    
+                    // Initialize scanner when page loads
+                    $(document).ready(function() {
+                        core.bus.on('web_client_ready', null, function() {
+                            // Mount scanner component
+                        });
+                    });
+                });
+            </script>
+        </t>
+    </t>
+</templates>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Serial Delete Confirmation Wizard -->
+    <record id="view_serial_delete_confirm_wizard_form" model="ir.ui.view">
+        <field name="name">serial.delete.confirm.wizard.form</field>
+        <field name="model">serial.delete.confirm.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Confirm Serial Deletion">
+                <sheet>
+                    <div class="alert alert-warning" role="alert">
+                        <h4>
+                            <i class="fa fa-warning"/> Warning: Permanent Deletion
+                        </h4>
+                        <p>
+                            You are about to permanently delete this serial number. 
+                            This action cannot be undone.
+                        </p>
+                    </div>
+                    
+                    <group>
+                        <field name="serial_number"/>
+                        <field name="equipment_name"/>
+                    </group>
+                    
+                    <group>
+                        <field name="confirm_text" 
+                               placeholder='Type "DELETE" to confirm'
+                               class="text-danger font-weight-bold"/>
+                    </group>
+                    
+                    <div class="alert alert-info mt-3" role="alert">
+                        <i class="fa fa-info-circle"/> 
+                        <strong>Note:</strong> Only unused serial numbers can be deleted. 
+                        Serials with history will be archived instead of deleted.
+                    </div>
+                </sheet>
+                
+                <footer>
+                    <button string="Delete Permanently" 
+                            name="action_confirm_delete" 
+                            type="object" 
+                            class="btn-danger"/>
+                    <button string="Cancel" 
+                            class="btn-secondary" 
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+</odoo>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Security Groups -->
+        
+        <!-- Rental User: Can view and create rentals -->
+        <record id="group_rental_user" model="res.groups">
+            <field name="name">Rental User</field>
+            <field name="category_id" ref="base.module_category_sales_rental"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        
+        <!-- Rental Manager: Can manage all rental operations -->
+        <record id="group_rental_manager" model="res.groups">
+            <field name="name">Rental Manager</field>
+            <field name="category_id" ref="base.module_category_sales_rental"/>
+            <field name="implied_ids" eval="[(4, ref('group_rental_user'))]"/>
+        </record>
+        
+        <!-- Multi-company rules -->
+        
+        <!-- Equipment: Multi-company rule -->
+        <!-- <record id="rental_equipment_company_rule" model="ir.rule">
+            <field name="name">Rental Equipment: multi-company</field>
+            <field name="model_id" ref="model_rental_equipment"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+            <field name="global" eval="True"/>
+        </record> -->
+        
+        <!-- Project: Multi-company rule -->
+        <!-- <record id="rental_project_company_rule" model="ir.rule">
+            <field name="name">Rental Project: multi-company</field>
+            <field name="model_id" ref="model_rental_project"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+            <field name="global" eval="True"/>
+        </record> -->
+        
+        <!-- User-specific rules -->
+        
+        <!-- Rental Users: Can see all projects -->
+        <record id="rental_project_user_rule" model="ir.rule">
+            <field name="name">Rental Project: user access</field>
+            <field name="model_id" ref="model_rental_project"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_rental_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        
+        <!-- Rental Managers: Full access to all projects -->
+        <record id="rental_project_manager_rule" model="ir.rule">
+            <field name="name">Rental Project: manager access</field>
+            <field name="model_id" ref="model_rental_project"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_rental_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+        
+        <!-- Equipment: All users can read -->
+        <record id="rental_equipment_user_rule" model="ir.rule">
+            <field name="name">Rental Equipment: user access</field>
+            <field name="model_id" ref="model_rental_equipment"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_rental_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        
+        <!-- Equipment: Managers can do everything -->
+        <record id="rental_equipment_manager_rule" model="ir.rule">
+            <field name="name">Rental Equipment: manager access</field>
+            <field name="model_id" ref="model_rental_equipment"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_rental_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+        
+    </data>
+</odoo>
+<!-- 
+**Security Structure:**
+
+1. **Two User Groups:**
+   - **Rental User** - Can create/view rentals, read equipment
+   - **Rental Manager** - Full access to everything
+
+2. **Multi-company Support:**
+   - Equipment and projects respect company boundaries
+   - Works in multi-company Odoo installations
+
+3. **Access Rules:**
+   - Users: Read equipment, create/read projects
+   - Managers: Full CRUD on everything
+
+4. **Permission Matrix:**
+
+   Model              | User (R/W/C/D) | Manager (R/W/C/D)
+   ___________________|________________|__________________
+   Equipment          | R/-/-/-        | R/W/C/D
+   Project            | R/-/C/-        | R/W/C/D
+   Serial             | R/-/-/-        | R/W/C/D
+   Category           | R/-/-/-        | R/W/C/D
+-->

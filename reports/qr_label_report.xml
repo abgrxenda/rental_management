@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- QR Code Label Report Action -->
+    <record id="action_report_qr_code_label" model="ir.actions.report">
+        <field name="name">QR Code Label</field>
+        <field name="model">rental.equipment.serial</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">rental_management.report_qr_code_label_document</field>
+        <field name="report_file">rental_management.report_qr_code_label_document</field>
+        <field name="binding_model_id" ref="model_rental_equipment_serial"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'QR_Label_%s' % (object.serial_number)</field>
+    </record>
+    
+    <!-- QR Code Label Template -->
+    <template id="report_qr_code_label_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page" style="page-break-after: always;">
+                        <!-- Label for standard 4x6 inch label printer -->
+                        <div class="qr-label-container" style="width: 4in; height: 6in; padding: 0.25in; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                            
+                            <!-- Company Logo (if available) -->
+                            <!-- <div t-if="doc.equipment_id.company_id.logo" style="margin-bottom: 0.25in;">
+                                <img t-att-src="'data:image/png;base64,%s' % doc.equipment_id.company_id.logo.decode()" 
+                                     style="max-height: 0.75in; max-width: 3in;"
+                                     alt="Company Logo"/>
+                            </div> -->
+                            
+                            <!-- QR Code -->
+                            <div style="margin-bottom: 0.25in;">
+                                <t t-if="doc.qr_code">
+                                    <img t-att-src="'data:image/png;base64,%s' % doc.qr_code.decode()" 
+                                         style="width: 3in; height: 3in;"
+                                         alt="QR Code"/>
+                                </t>
+                                <t t-else="">
+                                    <div style="width: 3in; height: 3in; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; color: #999;">
+                                        <span>No QR Code</span>
+                                    </div>
+                                </t>
+                            </div>
+                            
+                            <!-- Serial Number -->
+                            <div style="font-size: 24pt; font-weight: bold; margin-bottom: 0.15in; font-family: monospace;">
+                                <t t-esc="doc.serial_number"/>
+                            </div>
+                            
+                            <!-- Item Name -->
+                            <div style="font-size: 14pt; margin-bottom: 0.1in;">
+                                <t t-esc="doc.equipment_id.name"/>
+                            </div>
+                            
+                            <!-- Item Category -->
+                            <div t-if="doc.equipment_id.category_ids" style="font-size: 10pt; color: #666;">
+                                <t t-esc="', '.join(doc.equipment_id.category_ids.mapped('name'))"/>
+                            </div>
+                            
+                            <!-- Status Badge -->
+                            <div style="margin-top: 0.15in;">
+                                <t t-set="status_color" t-value="'#28a745' if doc.status == 'available' else '#6c757d'"/>
+                                <span t-attf-style="padding: 5px 15px; border-radius: 15px; font-size: 10pt; font-weight: bold; background-color: {{ status_color }}; color: white;">
+                                    <t t-esc="dict(doc._fields['status']._description_selection(doc.env)).get(doc.status, doc.status)"/>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    
+    <!-- Batch QR Labels Report (multiple labels per page) -->
+    <record id="action_report_qr_code_labels_batch" model="ir.actions.report">
+        <field name="name">QR Code Labels (Batch)</field>
+        <field name="model">rental.equipment.serial</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">rental_management.report_qr_code_labels_batch_document</field>
+        <field name="report_file">rental_management.report_qr_code_labels_batch_document</field>
+        <field name="binding_model_id" ref="model_rental_equipment_serial"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'QR_Labels_Batch'</field>
+    </record>
+    
+    <!-- Batch Labels Template (9 per A4 page) -->
+    <template id="report_qr_code_labels_batch_document">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <style>
+                        .label-grid {
+                            display: grid;
+                            grid-template-columns: repeat(3, 1fr);
+                            gap: 0.2in;
+                            padding: 0.25in;
+                        }
+                        .label-item {
+                            border: 1px solid #ddd;
+                            padding: 0.15in;
+                            text-align: center;
+                            page-break-inside: avoid;
+                            height: 3.2in;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                        }
+                        .label-item img {
+                            max-width: 100%;
+                            height: auto;
+                        }
+                    </style>
+                    
+                    <div class="label-grid">
+                        <t t-foreach="docs" t-as="doc">
+                            <div class="label-item">
+                                <!-- QR Code -->
+                                <div style="margin-bottom: 0.1in;">
+                                    <t t-if="doc.qr_code">
+                                        <img t-att-src="'data:image/png;base64,%s' % doc.qr_code.decode()" 
+                                             style="width: 2in; height: 2in;"
+                                             alt="QR Code"/>
+                                    </t>
+                                </div>
+                                
+                                <!-- Serial Number -->
+                                <div style="font-size: 12pt; font-weight: bold; margin-bottom: 0.05in; font-family: monospace;">
+                                    <t t-esc="doc.serial_number"/>
+                                </div>
+                                
+                                <!-- Item Name -->
+                                <div style="font-size: 9pt; color: #333;">
+                                    <t t-esc="doc.equipment_id.name"/>
+                                </div>
+                                
+                                <!-- Status -->
+                                <div style="font-size: 8pt; color: #666; margin-top: 0.05in;">
+                                    <t t-esc="dict(doc._fields['status']._description_selection(doc.env)).get(doc.status, doc.status)"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>
