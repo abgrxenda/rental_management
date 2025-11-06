@@ -1,53 +1,71 @@
 ## **Module Structure: rental_management**
 
 ```
-rental_management/
-│
-├── __init__.py
-├── __manifest__.py
-│
-├── security/
-│   ├── ir.model.access.csv
-│   └── rental_security.xml
-│
-├── data/
-│   ├── rental_sequence.xml
-│   └── rental_data.xml
-│
-├── models/
-│   ├── __init__.py
-│   ├── rental_equipment.py
-│   ├── rental_equipment_category.py
-│   ├── rental_equipment_serial.py
-│   ├── rental_project.py
-│   ├── rental_project_item.py
-│   ├── rental_project_item_status.py
-│   └── res_config_settings.py
-│
-├── views/
-│   ├── rental_equipment_views.xml
-│   ├── rental_equipment_category_views.xml
-│   ├── rental_equipment_serial_views.xml
-│   ├── rental_project_views.xml
-│   ├── rental_project_item_views.xml
-│   ├── rental_menus.xml
-│   └── res_config_settings_views.xml
-│
-├── wizards/
-│   ├── __init__.py
-│   ├── rental_return_wizard.py
-│   └── rental_return_wizard_views.xml
-│
-├── controllers/
-│   ├── __init__.py
-│   └── main.py
-│
-├── static/
-│   └── description/
-│       ├── icon.png
-│       └── index.html
-│
-└── README.md
+
+├──controllers
+|   ├──__init__.py
+|   └──main.py
+├──data
+|   ├──rental_data.xml
+|   └──rental_sequence.xml
+├──models
+|   ├──__init__.py
+|   ├──company_qr_extension.py
+|   ├──qr_generator.py
+|   ├──rental_equipment.py
+|   ├──rental_equipment_category.py
+|   ├──rental_equipment_serial.py
+|   ├──rental_project.py
+|   ├──rental_project_item.py
+|   ├──rental_project_item_status.py
+|   ├──rental_scan_log.py
+|   ├──res_config_settings.py
+|   └──serial_qr_model.py
+├──reports
+|   ├──qr_label_report.xml
+|   └──rental_reports.xml
+├──security
+|   ├──access_summary.md
+|   ├──ir.model.access.csv
+|   └──rental_security.xml
+├──static
+|   ├──description
+|   |   ├──icon.png
+|   |   └──index.html
+|   ├──lib
+|   |   ├──jsQR
+|   |   |   └──jsQR.js
+|   ├──src
+|   |   ├──css
+|   |   |   └──qr_scanner_css.css
+|   |   ├──js
+|   |   |   └──qr_scanner.js
+|   |   ├──xml
+|   |   |   └──qr_scanner_template.xml
+├──views
+|   ├──qr_scanner_views.xml
+|   ├──rental_equipment_category_views.xml
+|   ├──rental_equipment_serial_views.xml
+|   ├──rental_equipment_views.xml
+|   ├──rental_menus.xml
+|   ├──rental_project_item_views.xml
+|   ├──rental_project_views.xml
+|   └──res_config_settings_views.xml
+├──wizards
+|   ├──__init__.py
+|   ├──bulk_serial_wizard.py
+|   ├──bulk_serial_wizard_views.xml
+|   ├──rental_return_wizard.py
+|   ├──rental_return_wizard_views.xml
+|   ├──serial_delete_confirm_wizard.py
+|   ├──serial_delete_confirm_wizard_views.xml
+|   ├──serial_selection_wizard.py
+|   └──serial_selection_wizard_views.xml
+├──README.md
+├──__init__.py
+├──__manifest__.py
+└──filemap.md
+
 ```
 
 ---
