@@ -134,13 +134,13 @@ class SerialSelectionWizard(models.TransientModel):
         # Auto-select first N available
         self.available_serial_ids = [(6, 0, available[:self.quantity_needed].ids)]
         
+    # IMPORTANT: Return action to reload the form with updated values
         return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Auto-Assigned'),
-                'message': _('%d serials automatically selected.') % self.quantity_needed,
-                'type': 'info',
-                'sticky': False,
-            }
+            'type': 'ir.actions.act_window',
+            'name': _('Select Serial Numbers'),
+            'res_model': 'serial.selection.wizard',
+            'res_id': self.id,  # Keep the same wizard record
+            'view_mode': 'form',
+            'target': 'new',
+            'context': self.env.context,
         }
