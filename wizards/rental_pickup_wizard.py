@@ -85,14 +85,13 @@ class RentalPickupWizard(models.TransientModel):
         # Update project state if first pickup
         if self.project_id.state == 'reserved':
             self.project_id.write({'state': 'ongoing'})
-        
+        # IMPORTANT: Return action to reload the form with updated values
         return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Pickup Confirmed'),
-                'message': _('%d serial(s) marked as picked up.') % len(self.serial_ids),
-                'type': 'success',
-                'sticky': False,
-            }
+            'type': 'ir.actions.act_window',
+            'name': _('Pickup Confirmed'),
+            'res_model': 'rental.pickup.wizard',
+            'res_id': self.id,  # Keep the same wizard record
+            'view_mode': 'form',
+            'target': 'new',
+            'context': self.env.context,
         }

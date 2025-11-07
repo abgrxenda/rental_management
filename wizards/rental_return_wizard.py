@@ -49,7 +49,7 @@ class RentalReturnWizard(models.TransientModel):
     return_signature = fields.Binary('Customer Signature')
     return_photos = fields.Many2many(
         'ir.attachment',
-        'return_wizard_photo_rel',
+        'partial_return_wizard_photo_rel',
         'wizard_id',
         'attachment_id',
         string='Return Photos'
@@ -100,6 +100,7 @@ class RentalReturnWizard(models.TransientModel):
             res['item_line_ids'] = lines
         
         return res
+
     def action_complete_return(self):
         """Complete the return process"""
         self.ensure_one()

@@ -50,14 +50,14 @@
                             string="Partial Pickup" 
                             type="object" 
                             class="btn-primary"
-                            invisible="state not in ['reserved', 'ongoing']"
+                            invisible="state not in ['reserved', 'ongoing','returned','invoiced']"
                             groups="rental_management.group_rental_user"/>
                     <!-- NEW: Partial Return Button -->
                     <button name="action_partial_return" 
                             string="Partial Return" 
                             type="object" 
                             class="btn-primary"
-                            invisible="state != 'ongoing'"
+                            invisible="state not in ['ongoing','returned','invoiced']"
                             groups="rental_management.group_rental_user"/>
                     <button name="action_start_rental" 
                             string="Start Rental" 
