@@ -45,13 +45,27 @@
                             type="object" 
                             class="btn-primary"
                             invisible="state != 'draft'"/>
+                    <!-- NEW: Partial Pickup Button -->
+                    <button name="action_partial_pickup" 
+                            string="Partial Pickup" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="state not in ['reserved', 'ongoing']"
+                            groups="rental_management.group_rental_user"/>
+                    <!-- NEW: Partial Return Button -->
+                    <button name="action_partial_return" 
+                            string="Partial Return" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="state != 'ongoing'"
+                            groups="rental_management.group_rental_user"/>
                     <button name="action_start_rental" 
                             string="Start Rental" 
                             type="object" 
                             class="btn-primary"
                             invisible="state != 'reserved'"/>
                     <button name="action_return" 
-                            string="Return Equipment" 
+                            string="Complete Return (All Items)" 
                             type="object" 
                             class="btn-primary"
                             invisible="state != 'ongoing'"/>
@@ -168,6 +182,13 @@
                                         options="{'no_create': True, 'color_field': 'status'}"
                                         readonly="parent.state != 'draft'"
                                         optional="hide"/>
+                                    <!-- NEW: Serial Numbers with Pickup/Return Info -->
+                                    <field name="assigned_serial_ids" 
+                                        widget="many2many_tags"
+                                        invisible="not equipment_has_serials"
+                                        options="{'no_create': True, 'color_field': 'status'}"
+                                        readonly="parent.state != 'draft'"
+                                        optional="show"/>
                                     <field name="unit_price" widget="monetary"/>
                                     <field name="subtotal" widget="monetary" sum="Subtotal"/>
                                     <button name="action_assign_serials_wizard" 
@@ -182,6 +203,33 @@
                                             icon="fa-eye"
                                             invisible="not equipment_has_serials"/>
                                 </list>
+                            </field>    
+                            <!-- NEW: Add Serial Details Section -->
+                            <separator string="Serial Number Details" invisible="not item_ids"/>
+                            <field name="item_ids" nolabel="1" mode="kanban" readonly="1">
+                                <kanban>
+                                    <field name="equipment_id"/>
+                                    <field name="assigned_serial_ids"/>
+                                    <templates>
+                                        <t t-name="kanban-box">
+                                            <div class="oe_kanban_card">
+                                                <div class="oe_kanban_content">
+                                                    <strong><field name="equipment_id"/></strong>
+                                                    <div t-if="record.assigned_serial_ids.raw_value.length > 0">
+                                                        <hr/>
+                                                        <t t-foreach="record.assigned_serial_ids.raw_value" t-as="serial">
+                                                            <div class="row">
+                                                                <div class="col-6">
+                                                                    <field name="assigned_serial_ids" widget="many2many_tags"/>
+                                                                </div>
+                                                            </div>
+                                                        </t>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </templates>
+                                </kanban>
                             </field>
                             <group class="oe_subtotal_footer oe_right">
                                 <field name="total_amount" widget="monetary"/>
@@ -230,7 +278,7 @@
                             <field name="item_status_ids" readonly="1">
                                 <list>
                                     <field name="create_date" string="Date"/>
-                                    <field name="equipment_name"/>
+                                    <field name="equipment_id"/>
                                     <field name="serial_number"/>
                                     <field name="status" widget="badge"/>
                                     <field name="user_id"/>

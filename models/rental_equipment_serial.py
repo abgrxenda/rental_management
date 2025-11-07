@@ -24,6 +24,27 @@ class RentalEquipmentSerial(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'serial_number'
     _order = 'sequence, serial_number'
+        # NEW: Per-serial rental tracking
+    actual_pickup_date = fields.Date(
+        'Actual Pickup Date',
+        help='When customer actually picked up this serial'
+    )
+    actual_return_date = fields.Date(
+        'Actual Return Date',
+        help='When customer actually returned this serial'
+    )
+    rental_days = fields.Integer(
+        'Rental Days',
+        compute='_compute_rental_days',
+        store=True,
+        help='Actual number of days this serial was rented'
+    )
+    rental_charge = fields.Float(
+        'Rental Charge',
+        compute='_compute_rental_charge',
+        store=True,
+        help='Total charge for this serial rental'
+    )
     
     equipment_id = fields.Many2one(
         'rental.equipment',
@@ -273,6 +294,26 @@ class RentalEquipmentSerial(models.Model):
             result.append((serial.id, name))
         return result
 
+    @api.depends('actual_pickup_date', 'actual_return_date')
+    def _compute_rental_days(self):
+        for serial in self:
+            if serial.actual_pickup_date and serial.actual_return_date:
+                delta = serial.actual_return_date - serial.actual_pickup_date
+                serial.rental_days = delta.days + 1  # Include both days
+            elif serial.actual_pickup_date:
+                # Still out - calculate to today
+                delta = fields.Date.today() - serial.actual_pickup_date
+                serial.rental_days = delta.days + 1
+            else:
+                serial.rental_days = 0
+    
+    @api.depends('rental_days', 'equipment_id.daily_rate')
+    def _compute_rental_charge(self):
+        for serial in self:
+            if serial.rental_days > 0 and serial.equipment_id:
+                serial.rental_charge = serial.rental_days * serial.equipment_id.daily_rate
+            else:
+                serial.rental_charge = 0.0
 # ========== QR CODE METHODS ==========
     
     @api.depends('serial_number')

@@ -243,17 +243,15 @@ class RentalProject(models.Model):
     def _compute_invoice_count(self):
         for project in self:
             project.invoice_count = 1 if project.invoice_id else 0
-    
+
     # CRUD and Sequencing
-    
     @api.model
     def create(self, vals):
         if vals.get('name', 'New') == 'New':
             vals['name'] = self.env['ir.sequence'].next_by_code('rental.project') or 'RENT/NEW'
         return super().create(vals)
-    
+
     # Constraints
-    
     @api.constrains('start_date', 'end_date')
     def _check_dates(self):
         for project in self:
@@ -453,3 +451,48 @@ class RentalProject(models.Model):
             'view_mode': 'form',
             'views': [(False, 'form')],
         }
+    
+    def action_partial_pickup(self):
+        """Open partial pickup wizard"""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Partial Pickup'),
+            'res_model': 'rental.pickup.wizard',
+            'view_mode': 'form',
+            'views': [(False, 'form')],
+            'target': 'new',
+            'context': {
+                'default_project_id': self.id,
+            }
+        }
+
+    def action_partial_return(self):
+        """Open partial return wizard"""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Partial Return'),
+            'res_model': 'rental.partial.return.wizard',
+            'view_mode': 'form',
+            'views': [(False, 'form')],
+            'target': 'new',
+            'context': {
+                'default_project_id': self.id,
+            }
+        }
+
+    @api.depends('item_ids.assigned_serial_ids.rental_charge')
+    def _compute_amounts(self):
+        """Recalculate total based on actual serial charges"""
+        for project in self:
+            # Sum all serial rental charges
+            all_serials = project.item_ids.mapped('assigned_serial_ids')
+            project.total_amount = sum(all_serials.mapped('rental_charge'))
+            
+            project.grand_total = (
+                project.total_amount +
+                project.late_fee_amount +
+                project.damage_fee -
+                project.discount_amount
+            )

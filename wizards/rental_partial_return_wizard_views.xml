@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Partial Return Wizard Form View -->
+    <record id="view_rental_partial_return_wizard_form" model="ir.ui.view">
+        <field name="name">rental.partial.return.wizard.form</field>
+        <field name="model">rental.partial.return.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Partial Equipment Return">
+                <sheet>
+                    <div class="alert alert-info" role="alert">
+                        <h4>
+                            <i class="fa fa-undo"/> Partial Equipment Return
+                        </h4>
+                        <p>
+                            Select which items the customer is returning today.
+                            Rental charges are calculated based on actual pickup and return dates.
+                        </p>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="project_id" readonly="1"/>
+                            <field name="return_date"/>
+                        </group>
+                        <group>
+                            <field name="total_charge" 
+                                   widget="monetary" 
+                                   readonly="1"
+                                   class="oe_subtotal_footer_separator"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Items to Return" name="items">
+                            <field name="line_ids" nolabel="1">
+                                <list editable="bottom" create="0" delete="0">
+                                    <field name="to_return" widget="boolean_toggle"/>
+                                    <field name="serial_id" 
+                                           readonly="1" 
+                                           force_save="1"
+                                           options="{'no_open': True}"/>
+                                    <field name="equipment_id" 
+                                           readonly="1" 
+                                           force_save="1"
+                                           column_invisible="1"/>
+                                    <field name="pickup_date" readonly="1"/>
+                                    <field name="rental_days" 
+                                           readonly="1"
+                                           decoration-bf="1"/>
+                                    <field name="daily_rate" 
+                                           widget="monetary" 
+                                           readonly="1"
+                                           optional="hide"/>
+                                    <field name="rental_charge" 
+                                           widget="monetary" 
+                                           readonly="1"
+                                           sum="Total"
+                                           decoration-bf="1"/>
+                                    <field name="condition"/>
+                                    <field name="damage_description" 
+                                           optional="hide"
+                                           placeholder="Describe damage..."/>
+                                    <field name="damage_fee" 
+                                           widget="monetary"
+                                           optional="hide"/>
+                                </list>
+                            </field>
+                            
+                            <group class="oe_subtotal_footer oe_right">
+                                <div class="oe_subtotal_footer_separator oe_inline">
+                                    <label for="total_charge" string="Total Rental Charges"/>
+                                    <field name="total_charge" 
+                                           nolabel="1" 
+                                           class="oe_subtotal_footer_separator" 
+                                           widget="monetary"
+                                           readonly="1"/>
+                                </div>
+                            </group>
+                        </page>
+                        
+                        <page string="Signature &amp; Photos" name="signature">
+                            <group>
+                                <group string="Customer Signature">
+                                    <field name="return_signature" 
+                                           widget="image" 
+                                           nolabel="1"
+                                           options="{'size': [400, 200]}"/>
+                                </group>
+                                <group string="Notes">
+                                    <field name="notes" 
+                                           nolabel="1"
+                                           placeholder="Any notes about this return..."/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <button string="Confirm Return" 
+                            name="action_confirm_return" 
+                            type="object" 
+                            class="btn-primary"/>
+                    <button string="Cancel" 
+                            class="btn-secondary" 
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Partial Return Wizard Action -->
+    <record id="action_rental_partial_return_wizard" model="ir.actions.act_window">
+        <field name="name">Partial Return</field>
+        <field name="res_model">rental.partial.return.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="views">[(False, 'form')]</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_rental_project"/>
+    </record>
+    
+</odoo>

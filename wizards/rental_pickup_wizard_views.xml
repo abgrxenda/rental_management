@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Pickup Wizard Form View -->
+    <record id="view_rental_pickup_wizard_form" model="ir.ui.view">
+        <field name="name">rental.pickup.wizard.form</field>
+        <field name="model">rental.pickup.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Partial Equipment Pickup">
+                <sheet>
+                    <div class="alert alert-info" role="alert">
+                        <h4>
+                            <i class="fa fa-truck"/> Partial Equipment Pickup
+                        </h4>
+                        <p>
+                            Select which serial numbers the customer is picking up today.
+                            Only <strong>Reserved</strong> serials are available for pickup.
+                        </p>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="project_id" readonly="1"/>
+                            <field name="pickup_date"/>
+                        </group>
+                        <group>
+                            <div class="alert alert-warning mt-2" role="alert">
+                                <strong>Important:</strong> Make sure customer signs for the items being picked up.
+                            </div>
+                        </group>
+                    </group>
+                    
+                    <separator string="Select Serials to Pickup"/>
+                    <field name="serial_ids" 
+                           nolabel="1" 
+                           widget="many2many"
+                           options="{'no_create': True}">
+                        <list create="0" delete="0" edit="0">
+                            <field name="serial_number"/>
+                            <field name="equipment_name"/>
+                            <field name="status" widget="badge"
+                                   decoration-info="status == 'reserved'"/>
+                            <field name="programming_config" optional="hide"/>
+                        </list>
+                    </field>
+                    
+                    <group>
+                        <group string="Customer Signature">
+                            <field name="pickup_signature" 
+                                   widget="image" 
+                                   nolabel="1"
+                                   options="{'size': [400, 200]}"/>
+                        </group>
+                        <group string="Notes">
+                            <field name="notes" 
+                                   nolabel="1"
+                                   placeholder="Any special notes about this pickup..."/>
+                        </group>
+                    </group>
+                </sheet>
+                
+                <footer>
+                    <button string="Confirm Pickup" 
+                            name="action_confirm_pickup" 
+                            type="object" 
+                            class="btn-primary"/>
+                    <button string="Cancel" 
+                            class="btn-secondary" 
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Pickup Wizard Action -->
+    <record id="action_rental_pickup_wizard" model="ir.actions.act_window">
+        <field name="name">Partial Pickup</field>
+        <field name="res_model">rental.pickup.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="views">[(False, 'form')]</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_rental_project"/>
+    </record>
+    
+</odoo>

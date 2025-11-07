@@ -23,3 +23,9 @@ access_serial_delete_confirm_wizard_user,serial.delete.confirm.wizard.user,model
 access_serial_delete_confirm_wizard_manager,serial.delete.confirm.wizard.manager,model_serial_delete_confirm_wizard,group_rental_manager,1,1,1,1
 access_serial_selection_wizard_user,serial.selection.wizard.user,model_serial_selection_wizard,group_rental_user,1,1,1,1
 access_serial_selection_wizard_manager,serial.selection.wizard.manager,model_serial_selection_wizard,group_rental_manager,1,1,1,1
+access_rental_pickup_wizard_user,rental.pickup.wizard.user,model_rental_pickup_wizard,group_rental_user,1,1,1,1
+access_rental_pickup_wizard_manager,rental.pickup.wizard.manager,model_rental_pickup_wizard,group_rental_manager,1,1,1,1
+access_rental_partial_return_wizard_user,rental.partial.return.wizard.user,model_rental_partial_return_wizard,group_rental_user,1,1,1,1
+access_rental_partial_return_wizard_manager,rental.partial.return.wizard.manager,model_rental_partial_return_wizard,group_rental_manager,1,1,1,1
+access_rental_partial_return_wizard_line_user,rental.partial.return.wizard.line.user,model_rental_partial_return_wizard_line,group_rental_user,1,1,1,1
+access_rental_partial_return_wizard_line_manager,rental.partial.return.wizard.line.manager,model_rental_partial_return_wizard_line,group_rental_manager,1,1,1,1

@@ -17,6 +17,11 @@
                        decoration-danger="status in ['damaged', 'repairing']"
                        decoration-muted="status == 'disposed'"/>
                 <field name="current_project_name" optional="show"/>
+                <!-- NEW: Rental tracking columns -->
+                <field name="actual_pickup_date" optional="hide"/>
+                <field name="actual_return_date" optional="hide"/>
+                <field name="rental_days" optional="hide"/>
+                <field name="rental_charge" widget="monetary" optional="hide" sum="Total"/>
                 <field name="programming_config" optional="hide"/>
                 <field name="active" widget="boolean_toggle"/>
             </list>
@@ -93,6 +98,13 @@
                                 invisible="status not in ['reserved', 'rented']"
                                 options="{'no_create': True}"/>
                             <field name="active"/>
+                        </group>
+                        <!-- NEW: Rental Dates Group -->
+                        <group string="Rental Dates" invisible="status not in ['rented', 'returned']">
+                            <field name="actual_pickup_date" readonly="1"/>
+                            <field name="actual_return_date" readonly="1"/>
+                            <field name="rental_days" readonly="1" decoration-bf="1"/>
+                            <field name="rental_charge" widget="monetary" readonly="1" decoration-bf="1"/>
                         </group>
                         <group string="Configuration">
                             <field name="programming_config" 

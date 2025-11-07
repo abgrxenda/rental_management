@@ -86,6 +86,8 @@ Requirements:
         'wizards/bulk_serial_wizard_views.xml',  # NEW - Add this line
         'wizards/serial_delete_confirm_wizard_views.xml',  # NEW - Add this line
         'wizards/serial_selection_wizard_views.xml',  # NEW - Add this line
+        'wizards/rental_pickup_wizard_views.xml',  # NEW
+        'wizards/rental_partial_return_wizard_views.xml',  # NEW
         
         # Reports
         'reports/qr_label_report.xml',  # Make sure this line exists
