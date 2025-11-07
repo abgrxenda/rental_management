@@ -11,9 +11,9 @@
                 <field name="equipment_name"/>
                 <field name="serial_number"/>
                 <field name="status" widget="badge"
-                       decoration-success="status == 'available'"
+                       decoration-success="status in ['available', 'returned']"
                        decoration-info="status == 'reserved'"
-                       decoration-warning="status in ['rented', 'returned']"
+                       decoration-warning="status == 'rented'"
                        decoration-danger="status in ['damaged', 'repairing']"
                        decoration-muted="status == 'disposed'"/>
                 <field name="current_project_name" optional="show"/>
@@ -93,7 +93,12 @@
                     
                     <group>
                         <group string="Current Status">
-                            <field name="status" widget="badge"/>
+                            <field name="status" widget="badge"
+                                decoration-success="status in ['available', 'returned']"
+                                decoration-info="status == 'reserved'"
+                                decoration-warning="status == 'rented'"
+                                decoration-danger="status in ['damaged', 'repairing']"
+                                decoration-muted="status == 'disposed'"/>
                             <field name="current_project_id" 
                                 invisible="status not in ['reserved', 'rented']"
                                 options="{'no_create': True}"/>
@@ -123,7 +128,12 @@
                             <field name="status_history_ids" readonly="1">
                                 <list>
                                     <field name="create_date" string="Date"/>
-                                    <field name="status" widget="badge"/>
+                                    <field name="status" widget="badge"
+                                        decoration-success="status in ['available', 'returned']"
+                                        decoration-info="status == 'reserved'"
+                                        decoration-warning="status == 'rented'"
+                                        decoration-danger="status in ['damaged', 'repairing']"
+                                        decoration-muted="status == 'disposed'"/>
                                     <field name="project_name"/>
                                     <field name="user_id"/>
                                     <field name="notes"/>

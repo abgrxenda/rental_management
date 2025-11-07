@@ -180,7 +180,7 @@ class RentalPartialReturnWizardLine(models.TransientModel):
         
         # Determine new status
         if self.condition == 'good':
-            new_status = 'available'
+            new_status = 'returned'
         elif self.condition == 'minor_damage':
             new_status = 'damaged'
         elif self.condition == 'damaged':
@@ -192,7 +192,7 @@ class RentalPartialReturnWizardLine(models.TransientModel):
         self.serial_id.write({
             'status': new_status,
             'actual_return_date': return_date,
-            'current_project_id': False if new_status in ['available', 'disposed'] else self.serial_id.current_project_id.id
+            'current_project_id': False if new_status in ['returned', 'disposed'] else self.serial_id.current_project_id.id
         })
         
         # Log status history
