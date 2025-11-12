@@ -154,7 +154,7 @@ class RentalProjectItem(models.Model):
             if item.quantity <= 0:
                 raise ValidationError(_('Quantity must be greater than zero.'))
     
-    @api.constrains('quantity', 'assigned_serial_ids', 'equipment_has_serials')
+    @api.constrains('quantity', 'equipment_has_serials')
     def _check_serial_quantity_match(self):
         """Ensure assigned serials match quantity for serialized items"""
         for item in self:

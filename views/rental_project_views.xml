@@ -88,7 +88,7 @@
                     <button name="action_cancel" 
                             string="Cancel" 
                             type="object"
-                            invisible="state in ['returned', 'invoiced', 'cancelled']"
+                            invisible="state in ['draft','returned', 'invoiced', 'cancelled']"
                             confirm="Are you sure you want to cancel this project?"/>
                     <field name="state" widget="statusbar" 
                         statusbar_visible="draft,reserved,ongoing,returned,invoiced"/>
