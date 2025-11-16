@@ -202,10 +202,11 @@ class RentalProjectItem(models.Model):
                 # Check if we need to adjust assignments
                 current_count = len(self.assigned_serial_ids)
                 
-                if self.quantity > current_count:
+                # if self.quantity > current_count:
                     # Need more serials - auto-assign
-                    self._auto_assign_serials()
-                elif self.quantity < current_count:
+                    # self._auto_assign_serials()
+                # elif self.quantity < current_count:
+                if self.quantity < current_count:
                     # Need fewer serials - remove excess
                     serials_to_remove = self.assigned_serial_ids[:current_count - self.quantity]
                     self.assigned_serial_ids = [(3, serial.id) for serial in serials_to_remove]    

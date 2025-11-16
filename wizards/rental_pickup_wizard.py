@@ -26,7 +26,14 @@ class RentalPickupWizard(models.TransientModel):
         string='Serials to Pickup',
         domain="[('current_project_id', '=', project_id), ('status', '=', 'reserved')]"
     )
-    pickup_signature = fields.Binary('Customer Signature')
+    pickup_signature = fields.Image(  # Changed from Binary to Image
+        string='Customer Signature',
+        required=True,
+        max_width=1024,
+        max_height=1024,
+        help='Draw signature using mouse or stylus'
+    )
+    
     notes = fields.Text('Pickup Notes')
     
     @api.model
@@ -79,8 +86,28 @@ class RentalPickupWizard(models.TransientModel):
                 'equipment_id': serial.equipment_id.id,
                 'serial_id': serial.id,
                 'status': 'rented',
+                'signature': self.pickup_signature,
                 'notes': f'Picked up on {self.pickup_date}. {self.notes or ""}'
             })
+
+        # Get client IP address (Odoo 18 compatible way)
+        try:
+            request = self.env['ir.http'].sudo()._get_request()
+            ip_address = request.httprequest.environ.get('REMOTE_ADDR') if request else False
+        except:
+            ip_address = False
+                
+        # Create signature record
+        self.env['rental.project.signature'].create({
+            'project_id': self.project_id.id,
+            'signature_type': 'return',
+            'signer_name': 'customer',
+            'signer_role': 'customer',
+            'signature': self.pickup_signature,
+            'notes': self.notes,
+            'serial_ids': [(6, 0, self.serial_ids.ids)] if self.serial_ids else False,
+            'ip_address': ip_address,
+        })
         
         # Update project state if first pickup
         if self.project_id.state == 'reserved':

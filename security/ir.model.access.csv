@@ -29,3 +29,7 @@ access_rental_partial_return_wizard_user,rental.partial.return.wizard.user,model
 access_rental_partial_return_wizard_manager,rental.partial.return.wizard.manager,model_rental_partial_return_wizard,group_rental_manager,1,1,1,1
 access_rental_partial_return_wizard_line_user,rental.partial.return.wizard.line.user,model_rental_partial_return_wizard_line,group_rental_user,1,1,1,1
 access_rental_partial_return_wizard_line_manager,rental.partial.return.wizard.line.manager,model_rental_partial_return_wizard_line,group_rental_manager,1,1,1,1
+access_rental_project_signature_user,rental.project.signature.user,model_rental_project_signature,group_rental_user,1,1,1,0
+access_rental_project_signature_manager,rental.project.signature.manager,model_rental_project_signature,group_rental_manager,1,1,1,1
+access_add_signature_wizard_user,add.signature.wizard.user,model_add_signature_wizard,group_rental_user,1,1,1,1
+access_add_signature_wizard_manager,add.signature.wizard.manager,model_add_signature_wizard,group_rental_manager,1,1,1,1

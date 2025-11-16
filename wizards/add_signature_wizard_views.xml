@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Add Signature Wizard Form -->
+    <record id="view_add_signature_wizard_form" model="ir.ui.view">
+        <field name="name">add.signature.wizard.form</field>
+        <field name="model">add.signature.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Add Signature">
+                <sheet>
+                    <div class="alert alert-info" role="alert">
+                        <h4><i class="fa fa-pencil"/> Capture Signature</h4>
+                        <p>Draw the signature using your mouse or stylus device in the signature box below.</p>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="project_id" readonly="1"/>
+                            <field name="signature_type"/>
+                        </group>
+                        <group>
+                            <field name="signer_name" placeholder="e.g., John Smith"/>
+                            <field name="signer_role"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Signature Pad -->
+                    <separator string="Signature"/>
+                    <field name="signature" 
+                           widget="signature" 
+                           nolabel="1"
+                           required="1"
+                           placeholder="Draw signature here..."/>
+                    
+                    <div class="text-muted small mb-3">
+                        <i class="fa fa-info-circle"/> 
+                        Click "Adopt &amp; Sign" to save your signature, or "Clear" to start over
+                    </div>
+                    
+                    <!-- Optional Fields -->
+                    <group string="Additional Information">
+                        <field name="serial_ids" 
+                               widget="many2many_tags"
+                               placeholder="Select serials (optional for partial pickup/return)"
+                               invisible="signature_type not in ['partial_pickup', 'partial_return']"
+                               domain="[('current_project_id', '=', project_id)]"/>
+                        <field name="notes" 
+                               placeholder="Additional notes about this signature..."
+                               nolabel="1"/>
+                    </group>
+                </sheet>
+                
+                <footer>
+                    <button string="Save Signature" 
+                            name="action_save_signature" 
+                            type="object" 
+                            class="btn-primary"/>
+                    <button string="Cancel" 
+                            class="btn-secondary" 
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Add Signature Wizard Action -->
+    <record id="action_add_signature_wizard" model="ir.actions.act_window">
+        <field name="name">Add Signature</field>
+        <field name="res_model">add.signature.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_rental_project"/>
+    </record>
+    
+</odoo>

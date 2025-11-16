@@ -148,6 +148,19 @@ class RentalProject(models.Model):
     invoice_id = fields.Many2one('account.move', 'Invoice', copy=False)
     invoice_count = fields.Integer('Invoice Count', compute='_compute_invoice_count')
     
+    # ADD THIS AFTER invoice_id field (around line 139)
+    signature_ids = fields.One2many(
+        'rental.project.signature',
+        'project_id',
+        string='Signatures',
+        help='All signatures collected for this project'
+    )
+    
+    signature_count = fields.Integer(
+        'Signature Count',
+        compute='_compute_signature_count'
+    )
+    
     # Documents and Signatures
     document_ids = fields.Many2many(
         'ir.attachment',
@@ -243,6 +256,11 @@ class RentalProject(models.Model):
     def _compute_invoice_count(self):
         for project in self:
             project.invoice_count = 1 if project.invoice_id else 0
+    
+    # ADD THIS COMPUTE METHOD after _compute_invoice_count (around line 257)
+    def _compute_signature_count(self):
+        for project in self:
+            project.signature_count = len(project.signature_ids)
 
     # CRUD and Sequencing
     @api.model
@@ -482,6 +500,20 @@ class RentalProject(models.Model):
             }
         }
 
+    def action_add_signature_wizard(self):
+        """Open signature wizard"""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Add Signature'),
+            'res_model': 'add.signature.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_project_id': self.id,
+            }
+        }
+    
     @api.depends('item_ids.assigned_serial_ids.rental_charge')
     def _compute_amounts(self):
         """Recalculate total based on actual serial charges"""

@@ -161,9 +161,22 @@
                         <field name="damage_severity" readonly="1"/>
                         <field name="repair_cost_estimate" widget="monetary" readonly="1"/>
                     </group>
-                    
-                    <group string="Notes">
-                        <field name="notes" readonly="1" nolabel="1"/>
+                    <group>
+                        <group string="Signature">
+                            <field name="signature" 
+                                widget="signature" 
+                                nolabel="1"
+                                required="1"
+                                placeholder="Draw signature here..."/>
+                            
+                            <div class="text-muted small mb-3">
+                                <i class="fa fa-info-circle"/> 
+                                Click "Adopt &amp; Sign" to save your signature, or "Clear" to start over
+                            </div>
+                        </group>
+                        <group string="Notes">
+                            <field name="notes" readonly="1" nolabel="1"/>
+                        </group>
                     </group>
                     
                     <group string="Photos" invisible="not photo_ids">

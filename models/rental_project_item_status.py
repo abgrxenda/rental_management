@@ -86,6 +86,14 @@ class RentalProjectItemStatus(models.Model):
         readonly=True
     )
     
+    signature = fields.Image(  # Changed from Binary to Image
+        string='Signature',
+        required=True,
+        max_width=1024,
+        max_height=1024,
+        help='Draw signature using mouse or stylus'
+    )
+    
     # Photos for this status change
     photo_ids = fields.Many2many(
         'ir.attachment',

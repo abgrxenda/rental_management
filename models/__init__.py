@@ -33,3 +33,5 @@ from . import rental_scan_log  # Depends on: equipment, serial, project
 from . import res_config_settings  # Can reference company, etc.
 
 from . import company_qr_extension  # If you have company logo feature
+
+from . import rental_project_signature  # ADD THIS LINE

@@ -29,7 +29,14 @@ class RentalPartialReturnWizard(models.TransientModel):
         compute='_compute_total_charge'
     )
     # Return signature and photos
-    return_signature = fields.Binary('Customer Signature')
+    return_signature = fields.Image(  # Changed from Binary to Image
+        string='Customer Signature',
+        required=True,
+        max_width=1024,
+        max_height=1024,
+        help='Draw signature using mouse or stylus'
+    )
+    
     return_photos = fields.Many2many(
         'ir.attachment',
         'return_wizard_photo_rel',
@@ -110,6 +117,25 @@ class RentalPartialReturnWizard(models.TransientModel):
             'return_photos': [(6, 0, self.return_photos.ids)]
         })
         
+                # Get client IP address (Odoo 18 compatible way)
+        try:
+            request = self.env['ir.http'].sudo()._get_request()
+            ip_address = request.httprequest.environ.get('REMOTE_ADDR') if request else False
+        except:
+            ip_address = False
+                
+        # Create signature record
+        self.env['rental.project.signature'].create({
+            'project_id': self.project_id.id,
+            'signature_type': 'return',
+            'signer_name': 'customer',
+            'signer_role': 'customer',
+            'signature': self.return_signature,
+            'notes': self.notes,
+            'serial_ids': [(6, 0, self.line_ids.serial_id.ids)] if self.line_ids.serial_id else False,
+            'ip_address': ip_address,
+        })
+        
         # Process each return
         for line in lines_to_return:
             line.action_process_return(self.return_date)
@@ -131,15 +157,15 @@ class RentalPartialReturnWizard(models.TransientModel):
                 'actual_return_date': self.return_date
             })
         # IMPORTANT: Return action to reload the form with updated values
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('Return Confirmed'),
-            'res_model': 'rental.partial.return.wizard',
-            'res_id': self.id,  # Keep the same wizard record
-            'view_mode': 'form',
-            'target': 'new',
-            'context': self.env.context,
-        }
+        # return {
+        #     'type': 'ir.actions.act_window',
+        #     'name': _('Return Confirmed'),
+        #     'res_model': 'rental.partial.return.wizard',
+        #     'res_id': self.id,  # Keep the same wizard record
+        #     'view_mode': 'form',
+        #     'target': 'new',
+        #     'context': self.env.context,
+        # }
 
 
 
@@ -259,6 +285,7 @@ class RentalPartialReturnWizardLine(models.TransientModel):
             'equipment_id': self.equipment_id.id,
             'serial_id': self.serial_id.id,
             'status': new_status,
+            'signature': self.wizard_id.return_signature,
             'notes': f'Returned on {return_date}. Condition: {self.condition}. Days rented: {self.rental_days}. Charge: ${self.rental_charge}',
             'damage_description': self.damage_description,
             'damage_severity': 'minor' if self.condition == 'minor_damage' else 'severe' if self.condition in ['damaged', 'lost'] else None,

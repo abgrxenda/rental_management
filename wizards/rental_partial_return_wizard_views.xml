@@ -83,9 +83,15 @@
                             <group>
                                 <group string="Customer Signature">
                                     <field name="return_signature" 
-                                           widget="image" 
-                                           nolabel="1"
-                                           options="{'size': [400, 200]}"/>
+                                        widget="signature" 
+                                        nolabel="1"
+                                        required="1"
+                                        placeholder="Draw signature here..."/>
+                                    
+                                    <div class="text-muted small mb-3">
+                                        <i class="fa fa-info-circle"/> 
+                                        Click "Adopt &amp; Sign" to save your signature, or "Clear" to start over
+                                    </div>
                                 </group>
                                 <group string="Notes">
                                     <field name="notes" 

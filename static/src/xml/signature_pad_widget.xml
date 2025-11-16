@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="rental_management.SignaturePadWidget">
+        <div class="o_field_signature_pad">
+            <div class="signature-pad-container">
+                <canvas 
+                    t-ref="signatureCanvas" 
+                    class="signature-canvas"
+                    t-att-class="{'readonly': props.readonly}"
+                />
+                
+                <div t-if="!props.readonly" class="signature-controls mt-2">
+                    <button 
+                        type="button"
+                        class="btn btn-secondary btn-sm"
+                        t-on-click="() => this.clearSignature()"
+                        t-att-disabled="state.isEmpty">
+                        <i class="fa fa-eraser"/> Clear
+                    </button>
+                    <span class="text-muted ms-2" t-if="state.isEmpty">
+                        <i class="fa fa-info-circle"/> Sign above using mouse or stylus
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Preview when readonly -->
+            <div t-if="props.readonly and fieldValue" class="signature-preview mt-2">
+                <img t-att-src="'data:image/png;base64,' + fieldValue" 
+                     alt="Signature" 
+                     class="img-fluid border rounded p-2"
+                     style="max-width: 100%; background: #fafafa;"/>
+            </div>
+        </div>
+    </t>
+</templates>

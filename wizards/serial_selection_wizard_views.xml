@@ -45,12 +45,12 @@
                            nolabel="1" 
                            widget="many2many"
                            options="{'no_create': True}"
-                           domain="[('equipment_id', '=', equipment_id), '|', ('status', '=', 'available'), ('id', 'in', currently_assigned_ids)]">
+                           domain="[('equipment_id', '=', equipment_id), '|', ('status', 'in', ['available','returned']), ('id', 'in', currently_assigned_ids)]">
                         <list create="0" delete="0" edit="0">
                             <field name="serial_number"/>
                             <field name="status" widget="badge"
-                                   decoration-success="status == 'available'"
-                                   decoration-muted="status != 'available'"/>
+                                   decoration-success="status in ['available','returned']"
+                                   decoration-muted="status not in ['available','returned']"/>
                             <field name="programming_config" optional="hide"/>
                         </list>
                     </field>

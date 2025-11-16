@@ -50,14 +50,14 @@
                             string="Partial Pickup" 
                             type="object" 
                             class="btn-primary"
-                            invisible="state not in ['reserved', 'ongoing','returned','invoiced']"
+                            invisible="state not in ['reserved', 'ongoing','returned']"
                             groups="rental_management.group_rental_user"/>
                     <!-- NEW: Partial Return Button -->
                     <button name="action_partial_return" 
                             string="Partial Return" 
                             type="object" 
                             class="btn-primary"
-                            invisible="state not in ['ongoing','returned','invoiced']"
+                            invisible="state not in ['ongoing','returned']"
                             groups="rental_management.group_rental_user"/>
                     <button name="action_start_rental" 
                             string="Start Rental" 
@@ -175,20 +175,14 @@
                                         string="Assigned Serials"
                                         invisible="not equipment_has_serials"
                                         readonly="1"
-                                        optional="show"/>
-                                    <field name="assigned_serial_ids" 
-                                        widget="many2many_tags"
-                                        invisible="not equipment_has_serials"
-                                        options="{'no_create': True, 'color_field': 'status'}"
-                                        readonly="parent.state != 'draft'"
                                         optional="hide"/>
                                     <!-- NEW: Serial Numbers with Pickup/Return Info -->
-                                    <field name="assigned_serial_ids" 
+                                    <!-- <field name="assigned_serial_ids" 
                                         widget="many2many_tags"
                                         invisible="not equipment_has_serials"
                                         options="{'no_create': True, 'color_field': 'status'}"
                                         readonly="parent.state != 'draft'"
-                                        optional="show"/>
+                                        optional="show"/> -->
                                     <field name="unit_price" widget="monetary"/>
                                     <field name="subtotal" widget="monetary" sum="Subtotal"/>
                                     <button name="action_assign_serials_wizard" 
@@ -217,13 +211,11 @@
                                                     <strong><field name="equipment_id"/></strong>
                                                     <div t-if="record.assigned_serial_ids.raw_value.length > 0">
                                                         <hr/>
-                                                        <t t-foreach="record.assigned_serial_ids.raw_value" t-as="serial">
-                                                            <div class="row">
-                                                                <div class="col-6">
-                                                                    <field name="assigned_serial_ids" widget="many2many_tags"/>
-                                                                </div>
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <field name="assigned_serial_ids" widget="many2many_tags"/>
                                                             </div>
-                                                        </t>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -254,17 +246,55 @@
                                        placeholder="Special programming or configuration requirements..."/>
                             </group>
                         </page>
-                        
-                        <page string="Signatures &amp; Photos" name="documentation">
+
+                        <page string="Signatures" name="signatures" invisible="state in ['draft','cancelled', 'invoiced']">
+                            <!-- Signature Count Summary -->
+                            <div class="alert alert-info mb-3">
+                                <strong>
+                                    <i class="fa fa-pencil"/> 
+                                    Signatures Collected: <field name="signature_count" readonly="1"/>
+                                </strong>
+                            </div>
+                            
+                            <!-- Add New Signature Button -->
+                            <div class="mb-3" invisible="state in ['draft','cancelled', 'invoiced']">
+                                <button name="action_add_signature_wizard" 
+                                        string="Add Signature" 
+                                        type="object" 
+                                        class="btn btn-primary"/>
+                            </div>
+                            
+                            <!-- Signatures List (Editable for deletion) -->
+                            <field name="signature_ids" nolabel="1">
+                                <list create="0" delete="1" edit="0">
+                                    <field name="sign_datetime" string="Date &amp; Time"/>
+                                    <field name="signature_type" widget="badge"
+                                           decoration-info="signature_type == 'pickup'"
+                                           decoration-success="signature_type == 'return'"
+                                           decoration-warning="signature_type in ['partial_pickup', 'partial_return']"
+                                           decoration-danger="signature_type == 'damage_acknowledgment'"/>
+                                    <field name="signer_name"/>
+                                    <field name="signer_role"/>
+                                    <field name="user_id" string="Recorded By"/>
+                                    <field name="signature" 
+                                           widget="image" 
+                                           options="{'size': [100, 50]}"
+                                           class="o_signature_preview"/>
+                                    <button name="action_view_signature_detail" 
+                                            string="View Details" 
+                                            type="object" 
+                                            icon="fa-search-plus"
+                                            class="btn-sm btn-primary"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page string="Photos" name="photos">
                             <group>
-                                <group string="Pickup">
-                                    <field name="pickup_signature" widget="image"/>
-                                    <field name="pickup_signature_date" readonly="1"/>
+                                <group string="Pickup Photos">
                                     <field name="pickup_photos" widget="many2many_binary"/>
                                 </group>
-                                <group string="Return">
-                                    <field name="return_signature" widget="image"/>
-                                    <field name="return_signature_date" readonly="1"/>
+                                <group string="Return Photos">
                                     <field name="return_photos" widget="many2many_binary"/>
                                 </group>
                             </group>

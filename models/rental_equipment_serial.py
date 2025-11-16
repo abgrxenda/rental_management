@@ -375,7 +375,7 @@ class RentalEquipmentSerial(models.Model):
             
             # Generate QR code (300x300 pixels)
             qr_base64 = qr_generator.generate_qr_code(
-                data=str(self.serial_number),
+                data=str(f"Rental Item:\r\nitem-code:{self.equipment_id.code}\r\nitem-name:{self.equipment_id.name}\r\nitem-serial:{self.serial_number}"),
                 logo_binary=logo_binary,
                 size=1080
             )
