@@ -416,6 +416,20 @@ class RentalProject(models.Model):
             'view_mode': 'form',
             'views': [(False, 'form')],
         }
+
+    def action_set_returned(self):
+        """Generate invoice from rental project"""
+        self.ensure_one()
+        
+        if self.invoice_id:
+            raise UserError(_('Invoice already exists for this project.'))
+        
+        if not self.item_ids:
+            raise UserError(_('Cannot create invoice without rental items.'))
+        
+        self.write({
+            'state': 'returned'
+        })
     
     def _prepare_invoice_lines(self):
         """Prepare invoice lines from rental items"""

@@ -78,6 +78,10 @@
                             string="View Invoice" 
                             type="object"
                             invisible="not invoice_id"/>
+                    <button name="action_set_returned" 
+                            string="Set As Returned" 
+                            type="object"
+                            invisible="state != 'invoiced' or invoice_id"/>
                     <!-- NEW: Set to Draft button for Reserved state -->
                     <button name="action_set_to_draft" 
                             string="Set to Draft" 
