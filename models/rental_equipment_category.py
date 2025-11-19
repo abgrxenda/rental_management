@@ -7,7 +7,7 @@
 # Recursive check - Prevents circular parent-child loops
 # name_get - Shows full path (e.g., "Electronics / Laptops")
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 
 
 class RentalEquipmentCategory(models.Model):
@@ -54,21 +54,31 @@ class RentalEquipmentCategory(models.Model):
     
     sequence = fields.Integer('Sequence', default=10)
     active = fields.Boolean('Active', default=True)
-    
+
     @api.depends('parent_id')
     def _compute_equipment_count(self):
         """Count equipment in this category and subcategories"""
         for category in self:
+            # Skip computation for new (unsaved) records
+            if not category.id or isinstance(category.id, models.NewId):
+                category.equipment_count = 0
+                continue
+
             # Get all child category IDs (including self)
             child_ids = self.search([
                 ('id', 'child_of', category.id)
             ]).ids
-            
             # Count equipment in these categories
-            category.equipment_count = self.env['rental.equipment'].search_count([
-                ('category_ids', 'in', child_ids)
-            ])
-    
+            # category.equipment_count = self.env['rental.equipment'].search_count([
+            #     ('category_ids', 'in', child_ids)
+            # ])
+            if child_ids:
+                category.equipment_count = self.env['rental.equipment'].search_count([
+                    ('category_ids', 'in', child_ids)
+                ])
+            else:
+                category.equipment_count = 0
+
     @api.constrains('parent_id')
     def _check_category_recursion(self):
         """Prevent circular references"""
