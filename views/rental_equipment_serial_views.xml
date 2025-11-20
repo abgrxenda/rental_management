@@ -177,6 +177,7 @@
                                         #{record.status.raw_value === 'available' ? 'text-bg-success' : ''}
                                         #{record.status.raw_value === 'reserved' ? 'text-bg-info' : ''}
                                         #{record.status.raw_value === 'rented' ? 'text-bg-warning' : ''}
+                                        #{record.status.raw_value === 'returned' ? 'text-bg-success' : ''}
                                         #{record.status.raw_value === 'damaged' ? 'text-bg-danger' : ''}
                                         #{record.status.raw_value === 'disposed' ? 'text-bg-secondary' : ''}">
                                         <field name="status"/>
@@ -260,7 +261,7 @@
         <field name="res_model">rental.equipment.serial</field>
         <field name="view_mode">list,kanban,form</field>
         <field name="context">{'search_default_available': 1}</field>
-        <field name="domain">[('status', '=', 'available')]</field>
+        <field name="domain">[('status', 'in', ['available','returned'])]</field>
     </record>
     
     <record id="action_rental_serial_rented" model="ir.actions.act_window">

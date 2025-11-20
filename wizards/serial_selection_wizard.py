@@ -42,7 +42,7 @@ class SerialSelectionWizard(models.TransientModel):
         'wizard_id',
         'serial_id',
         string='Available Serials',
-        domain="[('equipment_id', '=', equipment_id), '|', ('status', '=', 'available'), ('id', 'in', currently_assigned_ids)]",
+        domain="[('equipment_id', '=', equipment_id), '|', ('status', 'in', ['available','returned']), ('id', 'in', currently_assigned_ids)]",
         help='Select serial numbers to assign'
     )
     
@@ -122,7 +122,7 @@ class SerialSelectionWizard(models.TransientModel):
         
         # Get available serials
         available = self.equipment_id.serial_ids.filtered(
-            lambda s: s.status == 'available'
+            lambda s: s.status == 'available' or s.status == 'returned'
         )
         
         if len(available) < self.quantity_needed:

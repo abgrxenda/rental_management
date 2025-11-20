@@ -238,7 +238,7 @@ class RentalProjectItem(models.Model):
         
         # Get available serials (not already assigned to this item)
         available_serials = self.equipment_id.serial_ids.filtered(
-            lambda s: s.status == 'available' and s.id not in current_assigned.ids
+            lambda s: (s.status == 'available' or s.status == 'returned') and s.id not in current_assigned.ids
         )
         
         if len(available_serials) < needed:
@@ -252,7 +252,7 @@ class RentalProjectItem(models.Model):
                     })
                 # Refresh available serials
                 available_serials = self.equipment_id.serial_ids.filtered(
-                    lambda s: s.status == 'available' and s.id not in current_assigned.ids
+                    lambda s: (s.status == 'available' or s.status == 'returned') and s.id not in current_assigned.ids
                 )
         
         # Assign serials (take first N available)
@@ -282,7 +282,7 @@ class RentalProjectItem(models.Model):
         equipment = self.equipment_id
         
         # Get available serials
-        available_serials = equipment.serial_ids.filtered(lambda s: s.status == 'available')
+        available_serials = equipment.serial_ids.filtered(lambda s: s.status == 'available' or s.status == 'returned')
         
         if len(available_serials) < self.quantity:
             # Check if we should auto-generate
@@ -295,7 +295,7 @@ class RentalProjectItem(models.Model):
                         'status': 'available'
                     })
                 # Re-fetch available serials
-                available_serials = equipment.serial_ids.filtered(lambda s: s.status == 'available')
+                available_serials = equipment.serial_ids.filtered(lambda s: s.status == 'available' or s.status == 'returned')
             else:
                 raise UserError(_(
                     'Insufficient serials for %s. Need %d, found %d. Please add more serials or enable auto-generation.'
@@ -404,7 +404,7 @@ class RentalProjectItem(models.Model):
         
         # Get available serials for this equipment
         available_serials = self.equipment_id.serial_ids.filtered(
-            lambda s: s.status == 'available' or s.id in self.assigned_serial_ids.ids
+            lambda s: (s.status == 'available' or s.status == 'returned') or s.id in self.assigned_serial_ids.ids
         )
         
         return {

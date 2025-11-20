@@ -111,13 +111,13 @@ class RentalEquipment(models.Model):
             if equipment.has_serials:
                 serials = equipment.serial_ids
                 equipment.total_stock = len(serials)
-                equipment.available_stock = len(serials.filtered(lambda s: s.status == 'available'))
+                equipment.available_stock = len(serials.filtered(lambda s: s.status == 'available' or s.status == 'returned'))
                 equipment.reserved_stock = len(serials.filtered(lambda s: s.status == 'reserved'))
                 equipment.rented_stock = len(serials.filtered(lambda s: s.status == 'rented'))
             else:
                 # For non-serialized items, set to 0 or implement quantity-based logic
                 equipment.total_stock = 0
-                equipment.available_stock = 0
+                equipment.available_stock = 1
                 equipment.reserved_stock = 0
                 equipment.rented_stock = 0
     
@@ -200,7 +200,7 @@ class RentalEquipment(models.Model):
             return self.available_stock >= quantity
         
         # For serialized items, check available serials
-        available_serials = self.serial_ids.filtered(lambda s: s.status == 'available')
+        available_serials = self.serial_ids.filtered(lambda s: s.status == 'available' or s.status == 'returned')
         
         # TODO: Check if any reserved/rented serials will be available in the date range
         # This requires checking project dates

@@ -278,7 +278,7 @@ class RentalEquipmentSerial(models.Model):
                     'Serial %s is marked as %s but not assigned to any project.'
                 ) % (serial.serial_number, serial.status))
             
-            if serial.status == 'available' and serial.current_project_id:
+            if serial.status in ['available','returned'] and serial.current_project_id:
                 raise ValidationError(_(
                     'Serial %s is marked as available but is still assigned to project %s.'
                 ) % (serial.serial_number, serial.current_project_id.name))
@@ -299,11 +299,11 @@ class RentalEquipmentSerial(models.Model):
         for serial in self:
             if serial.actual_pickup_date and serial.actual_return_date:
                 delta = serial.actual_return_date - serial.actual_pickup_date
-                serial.rental_days = delta.days + 1  # Include both days
+                serial.rental_days = delta.days  # Include both days
             elif serial.actual_pickup_date:
                 # Still out - calculate to today
                 delta = fields.Date.today() - serial.actual_pickup_date
-                serial.rental_days = delta.days + 1
+                serial.rental_days = delta.days
             else:
                 serial.rental_days = 0
     

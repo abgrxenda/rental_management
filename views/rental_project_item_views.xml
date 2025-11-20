@@ -53,9 +53,9 @@
                                 <list>
                                     <field name="serial_number"/>
                                     <field name="status" widget="badge"
-                                           decoration-success="status == 'available'"
+                                           decoration-success="status in ['available','returned']"
                                            decoration-info="status == 'reserved'"
-                                           decoration-warning="status in ['rented', 'returned']"
+                                           decoration-warning="status == 'rented'"
                                            decoration-danger="status in ['damaged', 'repairing']"/>
                                     <field name="programming_config"/>
                                 </list>

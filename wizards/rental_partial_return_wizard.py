@@ -167,12 +167,10 @@ class RentalPartialReturnWizard(models.TransientModel):
         #     'context': self.env.context,
         # }
 
-
-
 class RentalPartialReturnWizardLine(models.TransientModel):
     _name = 'rental.partial.return.wizard.line'
     _description = 'Partial Return Line'
-    
+
     wizard_id = fields.Many2one(
         'rental.partial.return.wizard',
         required=True,
@@ -189,7 +187,7 @@ class RentalPartialReturnWizardLine(models.TransientModel):
         required=True
     )
     to_return = fields.Boolean('Return This Item', default=True)
-    
+
     # Return assessment
     condition = fields.Selection([
         ('good', 'Good Condition'),
@@ -197,10 +195,10 @@ class RentalPartialReturnWizardLine(models.TransientModel):
         ('damaged', 'Damaged'),
         ('lost', 'Lost')
     ], string='Condition', default='good', required=True)
-    
+
     damage_description = fields.Text('Damage Description')
     damage_fee = fields.Float('Damage Fee')
-    
+
     # Auto-calculated rental info
     pickup_date = fields.Date(
         'Pickup Date',
@@ -220,18 +218,18 @@ class RentalPartialReturnWizardLine(models.TransientModel):
         'Rental Charge',
         compute='_compute_rental_info'
     )
-    
+
     @api.depends('pickup_date', 'wizard_id.return_date', 'daily_rate', 'to_return')
     def _compute_rental_info(self):
         for line in self:
             if line.to_return and line.pickup_date and line.wizard_id.return_date:
                 delta = line.wizard_id.return_date - line.pickup_date
-                line.rental_days = delta.days + 1
+                line.rental_days = delta.days
                 line.rental_charge = line.rental_days * line.daily_rate
             else:
                 line.rental_days = 0
                 line.rental_charge = 0.0
-    
+
     @api.onchange('condition')
     def _onchange_condition(self):
         """Auto-fill damage fee based on condition and settings"""
@@ -253,7 +251,7 @@ class RentalPartialReturnWizardLine(models.TransientModel):
         # Update wizard's has_damage flag
         if self.condition != 'good':
             self.wizard_id.has_damage = True
-    
+
     def action_process_return(self, return_date):
         """Process this return line"""
         self.ensure_one()

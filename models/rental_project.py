@@ -173,7 +173,7 @@ class RentalProject(models.Model):
     pickup_signature_date = fields.Datetime('Pickup Date')
     return_signature = fields.Binary('Return Signature', attachment=True)
     return_signature_date = fields.Datetime('Return Date')
-    
+
     # Photos (before/after)
     pickup_photos = fields.Many2many(
         'ir.attachment',
@@ -189,23 +189,23 @@ class RentalProject(models.Model):
         'attachment_id',
         string='Return Photos'
     )
-    
+
     sequence = fields.Integer('Sequence', default=10)
-    
+
     # NEW: Add color field for kanban
     color = fields.Integer('Color', default=0)
 
     # Compute Methods
-    
+
     @api.depends('start_date', 'end_date')
     def _compute_duration(self):
         for project in self:
             if project.start_date and project.end_date:
                 delta = project.end_date - project.start_date
-                project.duration_days = delta.days + 1  # Include both start and end day
+                project.duration_days = delta.days  # Include both start and end day
             else:
                 project.duration_days = 0
-    
+
     @api.depends('end_date', 'actual_return_date', 'state')
     def _compute_overdue(self):
         today = fields.Date.today()
@@ -222,7 +222,7 @@ class RentalProject(models.Model):
             else:
                 project.days_overdue = 0
                 project.is_overdue = False
-    
+
     @api.depends('item_ids.subtotal', 'late_fee_amount', 'damage_fee', 'discount_amount')
     def _compute_amounts(self):
         for project in self:
@@ -233,7 +233,7 @@ class RentalProject(models.Model):
                 project.damage_fee -
                 project.discount_amount
             )
-    
+
     @api.depends('days_overdue', 'late_fee_enabled', 'total_amount')
     def _compute_late_fee(self):
         IrConfigParam = self.env['ir.config_parameter'].sudo()
@@ -252,11 +252,11 @@ class RentalProject(models.Model):
                 project.late_fee_amount = max(fee_by_day, fee_by_percentage)
             else:
                 project.late_fee_amount = 0.0
-    
+
     def _compute_invoice_count(self):
         for project in self:
             project.invoice_count = 1 if project.invoice_id else 0
-    
+
     # ADD THIS COMPUTE METHOD after _compute_invoice_count (around line 257)
     def _compute_signature_count(self):
         for project in self:
@@ -276,15 +276,15 @@ class RentalProject(models.Model):
             if project.start_date and project.end_date:
                 if project.end_date < project.start_date:
                     raise ValidationError(_('End date cannot be before start date.'))
-    
+
     @api.constrains('item_ids')
     def _check_items(self):
         for project in self:
             if project.state != 'draft' and not project.item_ids:
                 raise ValidationError(_('Project must have at least one rental item.'))
-    
+
     # State Transition Methods
-    
+
     def action_reserve(self):
         """Reserve equipment and generate/assign serials"""
         for project in self:
@@ -299,7 +299,7 @@ class RentalProject(models.Model):
                 'state': 'reserved',
                 'pickup_signature_date': fields.Datetime.now()
             })
-    
+
     def action_start_rental(self):
         """Start the rental - equipment leaves warehouse"""
         for project in self:
@@ -311,7 +311,7 @@ class RentalProject(models.Model):
                 item.action_start_rental()
             
             project.write({'state': 'ongoing'})
-    
+
     def action_return(self):
         """Open return wizard for damage assessment"""
         self.ensure_one()
@@ -326,7 +326,7 @@ class RentalProject(models.Model):
                 'default_actual_return_date': fields.Date.today()
             }
         }
-    
+
     def action_complete_return(self):
         """Complete return (called from wizard)"""
         self.ensure_one()
@@ -340,7 +340,7 @@ class RentalProject(models.Model):
             'actual_return_date': fields.Date.today(),
             'return_signature_date': fields.Datetime.now()
         })
-    
+
     def action_cancel(self):
         """Cancel the project"""
         for project in self:
@@ -352,7 +352,7 @@ class RentalProject(models.Model):
                 item.action_release_serials()
             
             project.write({'state': 'cancelled'})
-    
+
     def action_set_to_draft(self):
         """Reset to draft"""
         for project in self:
@@ -377,9 +377,9 @@ class RentalProject(models.Model):
             #         'sticky': False,
             #     }
             # }
-    
+
     # Invoice Methods
-    
+
     def action_create_invoice(self):
         """Generate invoice from rental project"""
         self.ensure_one()
@@ -430,45 +430,101 @@ class RentalProject(models.Model):
         self.write({
             'state': 'returned'
         })
-    
+
     def _prepare_invoice_lines(self):
-        """Prepare invoice lines from rental items"""
+        """
+        Prepare invoice lines based on actual serial pickup/return dates.
+        Groups lines by: equipment + daily_rate + date range.
+        Each line shows serials, dates, quantity, rate, and total.
+        """
         lines = []
         
-        # Add rental item lines
+        # Step 1: Collect all returned/rented serials with actual dates
+        serial_data = []
         for item in self.item_ids:
+            for serial in item.assigned_serial_ids:
+                # Skip if never picked up
+                if not serial.actual_pickup_date:
+                    continue
+                # Use actual return date, or project end/actual return if not set
+                return_date = serial.actual_return_date or self.actual_return_date or self.end_date
+                pickup_date = serial.actual_pickup_date
+                
+                if not pickup_date or not return_date:
+                    continue
+                    
+                days = (return_date - pickup_date).days  # inclusive
+                if days <= 0:
+                    days = 1
+                    
+                daily_rate = item.equipment_id.daily_rate or 0.0
+                
+                serial_data.append({
+                    'serial': serial,
+                    'equipment': item.equipment_id,
+                    'daily_rate': daily_rate,
+                    'pickup_date': pickup_date,
+                    'return_date': return_date,
+                    'days': days,
+                    'line_total': daily_rate * days,
+                })
+
+        # Step 2: Group by (equipment, daily_rate, pickup_date, return_date)
+        from collections import defaultdict
+        groups = defaultdict(list)
+        for data in serial_data:
+            key = (
+                data['equipment'].id,
+                round(data['daily_rate'], 2),  # avoid float precision issues
+                data['pickup_date'],
+                data['return_date']
+            )
+            groups[key].append(data)
+
+        # Step 3: Generate invoice lines
+        for (equip_id, rate, p_date, r_date), group in groups.items():
+            equipment = group[0]['equipment']
+            serials = [g['serial'].serial_number for g in group]
+            qty = len(group)
+            days = group[0]['days']
+            total = sum(g['line_total'] for g in group)
+
+            # Build descriptive name
+            serial_list = ", ".join(serials[:3]) + ("..." if len(serials) > 3 else "")
+            date_range = f"{p_date.strftime('%d/%m/%Y')} → {r_date.strftime('%d/%m/%Y')}"
+            name = f"{equipment.name} — Serials: {serial_list} ({date_range}) ×{qty} × {days} days × {rate}/day"
+
             lines.append((0, 0, {
-                'name': f'{item.equipment_id.name} - Rental ({self.duration_days} days)',
-                'quantity': item.quantity,
-                'price_unit': item.unit_price,
+                'name': name,
+                'quantity': qty * days,
+                'price_unit': rate,  # Odoo expects unit price
+                'price_subtotal': total,
+                # Optional: link to serials for traceability
+                # 'analytic_distribution': {'serial_ids': [s['serial'].id for s in group]}
             }))
-        
-        # Add late fee if applicable
+
+        # Step 4: Add non-serial charges (late, damage, discount)
         if self.late_fee_amount > 0:
             lines.append((0, 0, {
                 'name': f'Late Fee ({self.days_overdue} days overdue)',
                 'quantity': 1,
                 'price_unit': self.late_fee_amount,
             }))
-        
-        # Add damage fee if applicable
         if self.damage_fee > 0:
             lines.append((0, 0, {
                 'name': 'Damage/Repair Fee',
                 'quantity': 1,
                 'price_unit': self.damage_fee,
             }))
-        
-        # Add discount if applicable
         if self.discount_amount > 0:
             lines.append((0, 0, {
                 'name': 'Discount',
                 'quantity': 1,
                 'price_unit': -self.discount_amount,
             }))
-        
+
         return lines
-    
+
     def action_view_invoice(self):
         """Open the related invoice"""
         self.ensure_one()
@@ -483,7 +539,7 @@ class RentalProject(models.Model):
             'view_mode': 'form',
             'views': [(False, 'form')],
         }
-    
+
     def action_partial_pickup(self):
         """Open partial pickup wizard"""
         self.ensure_one()
@@ -527,7 +583,7 @@ class RentalProject(models.Model):
                 'default_project_id': self.id,
             }
         }
-    
+
     @api.depends('item_ids.assigned_serial_ids.rental_charge')
     def _compute_amounts(self):
         """Recalculate total based on actual serial charges"""
@@ -535,7 +591,7 @@ class RentalProject(models.Model):
             # Sum all serial rental charges
             all_serials = project.item_ids.mapped('assigned_serial_ids')
             project.total_amount = sum(all_serials.mapped('rental_charge'))
-            
+
             project.grand_total = (
                 project.total_amount +
                 project.late_fee_amount +
