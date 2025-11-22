@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    
+
     <!-- Project List View -->
     <record id="view_rental_project_list" model="ir.ui.view">
         <field name="name">rental.project.list</field>
@@ -32,7 +32,7 @@
             </list>
         </field>
     </record>
-    
+
     <!-- Project Form View -->
     <record id="view_rental_project_form" model="ir.ui.view">
         <field name="name">rental.project.form</field>
@@ -332,8 +332,7 @@
             </form>
         </field>
     </record>
-    
-    <!-- Project Kanban View -->
+
     <!-- Project Kanban View with Status Columns -->
     <record id="view_rental_project_kanban" model="ir.ui.view">
         <field name="name">rental.project.kanban</field>
@@ -433,6 +432,24 @@
         </field>
     </record>
 
+    <!-- Project Calendar View -->
+    <record id="view_rental_project_calendar" model="ir.ui.view">
+        <field name="name">rental.project.calendar</field>
+        <field name="model">rental.project</field>
+        <field name="arch" type="xml">
+            <calendar 
+                string="Rental Projects Calendar"
+                date_start="start_date" 
+                date_stop="end_date"
+                color="id"
+                mode="month">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+
     <!-- Project Search View -->
     <record id="view_rental_project_search" model="ir.ui.view">
         <field name="name">rental.project.search</field>
@@ -476,12 +493,12 @@
             </search>
         </field>
     </record>
-    
+
     <!-- Main Project Action -->
     <record id="action_rental_project" model="ir.actions.act_window">
         <field name="name">Rental Projects</field>
         <field name="res_model">rental.project</field>
-        <field name="view_mode">kanban,list,form</field>  <!-- Kanban first -->
+        <field name="view_mode">kanban,list,calendar,form</field>  <!-- Kanban first -->
         <field name="context">{'group_by': 'state'}</field>  <!-- Group by state by default -->
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -494,7 +511,7 @@
             </p>
         </field>
     </record>
-    
+
     <!-- Filtered Project Actions -->
     <record id="action_rental_project_draft" model="ir.actions.act_window">
         <field name="name">Draft Projects</field>
@@ -503,7 +520,7 @@
         <field name="context">{'search_default_draft': 1}</field>
         <field name="domain">[('state', '=', 'draft')]</field>
     </record>
-    
+
     <record id="action_rental_project_ongoing" model="ir.actions.act_window">
         <field name="name">Ongoing Rentals</field>
         <field name="res_model">rental.project</field>
@@ -511,7 +528,7 @@
         <field name="context">{'search_default_ongoing': 1}</field>
         <field name="domain">[('state', '=', 'ongoing')]</field>
     </record>
-    
+
     <record id="action_rental_project_overdue" model="ir.actions.act_window">
         <field name="name">Overdue Rentals</field>
         <field name="res_model">rental.project</field>
