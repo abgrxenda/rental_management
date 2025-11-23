@@ -3,6 +3,7 @@
 A comprehensive rental management module for Odoo 18 with advanced QR code integration, mobile scanning capabilities, and complete rental lifecycle tracking.
 
 ![Odoo Version](https://img.shields.io/badge/Odoo-18.0-blue)
+![Python](https://img.shields.io/badge/Python-3-yellow?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/license-LGPL--3-green)
 ![Status](https://img.shields.io/badge/status-production%20ready-brightgreen)
 
