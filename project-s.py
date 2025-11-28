@@ -17,7 +17,7 @@ class ProjectStructure:
         self.main()
 
     def add_arguments(self, parser):
-        parser.add_argument('-s', '--source', type=str, const=True, nargs='?', default='/',
+        parser.add_argument('-s', '--source', type=str, const=True, nargs='?', default='./',
                             help='Enter Absolute Path to Project Folder')
         parser.add_argument('-o', '--output', type=str, const=True, nargs='?', default='project_structure',
                             help='Enter (Absolute Path)? to file name for output/project structure markdown')
